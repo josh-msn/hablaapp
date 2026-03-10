@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Habla — Spanisch lernen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0e0d0b;
+  --bg-card: #1a1916;
+  --bg-input: #252320;
+  --accent: #d4a853;
+  --accent-dim: #a8863f;
+  --text: #e8e4dc;
+  --text-dim: #9a9590;
+  --green: #6bcf7f;
+  --orange: #e8a94d;
+  --red: #e05c5c;
+  --radius: 12px;
+  --max-w: 430px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', 'Georgia', monospace;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
+
+#app {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2a2724;
+  flex-shrink: 0;
+}
+.header h1 { font-size: 22px; color: var(--accent); }
+.level-badge {
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.settings-btn {
+  background: none; border: none; color: var(--text-dim);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+}
+.settings-btn:hover { color: var(--text); }
+
+/* ── Screens ── */
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+.screen.active { display: flex; }
+
+/* ── Setup Screen ── */
+.setup-screen {
+  justify-content: center;
+  align-items: center;
+  padding: 32px 24px;
+  text-align: center;
+}
+.setup-screen h2 { font-size: 32px; color: var(--accent); margin-bottom: 8px; }
+.setup-screen .subtitle { color: var(--text-dim); margin-bottom: 32px; font-size: 14px; }
+.setup-form { width: 100%; max-width: 340px; }
+.input-group { margin-bottom: 16px; text-align: left; }
+.input-group label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1px solid #3a3632;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-field:focus { border-color: var(--accent); }
+.input-field::placeholder { color: var(--text-dim); }
+.security-note {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+  padding: 10px 12px;
+  background: #1a1916;
+  border-radius: 8px;
+  line-height: 1.6;
+  text-align: left;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  min-height: 48px;
+  min-width: 44px;
+}
+.btn:active { transform: scale(0.97); }
+.btn:hover { background: var(--accent-dim); }
+.btn-full { width: 100%; }
+.btn-sm { padding: 8px 16px; font-size: 13px; min-height: 36px; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+.btn-outline:hover { background: rgba(212,168,83,0.1); }
+.btn-danger { background: var(--red); }
+.btn-danger:hover { background: #c04a4a; }
+
+/* ── Tip Banner ── */
+.tip-banner {
+  background: var(--bg-card);
+  border-bottom: 1px solid #2a2724;
+  padding: 10px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.tip-banner .tip-icon { color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+.tip-banner .tip-text { flex: 1; line-height: 1.5; }
+.tip-banner .tip-close {
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 16px; padding: 0 4px; flex-shrink: 0;
+}
+.tip-banner .tip-close:hover { color: var(--text); }
+
+/* ── Chat ── */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-behavior: smooth;
+}
+.msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  position: relative;
+}
+.msg-user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--bg);
+  border-bottom-right-radius: 4px;
+}
+.msg-ai {
+  align-self: flex-start;
+  background: var(--bg-card);
+  border: 1px solid #2a2724;
+  border-bottom-left-radius: 4px;
+}
+.msg-ai .save-btn {
+  display: none;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  font-size: 14px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+.msg-ai:hover .save-btn { display: flex; }
+.msg-feedback {
+  align-self: flex-start;
+  max-width: 90%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #1c1f1a;
+  border: 1px solid #2a3328;
+}
+.feedback-correct { color: var(--green); }
+.feedback-close { color: var(--orange); }
+.feedback-wrong { color: var(--red); }
+.msg-system {
+  align-self: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 6px 12px;
+}
+.msg-typing {
+  align-self: flex-start;
+  background: var(--bg-card);
+  border: 1px solid #2a2724;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+}
+.typing-dots span {
+  display: inline-block;
+  width: 7px; height: 7px;
+  background: var(--text-dim);
+  border-radius: 50%;
+  margin: 0 2px;
+  animation: blink 1.4s infinite both;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0.3} 40%{opacity:1} }
+
+/* ── Chat Input ── */
+.chat-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #2a2724;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.chat-input {
+  flex: 1;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid #3a3632;
+  border-radius: 24px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  outline: none;
+  min-height: 44px;
+}
+.chat-input:focus { border-color: var(--accent); }
+.mic-btn {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+.mic-btn:active { transform: scale(0.92); }
+.mic-btn.recording {
+  background: var(--red);
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(224,92,92,0.5); }
+  70% { box-shadow: 0 0 0 12px rgba(224,92,92,0); }
+  100% { box-shadow: 0 0 0 0 rgba(224,92,92,0); }
+}
+.send-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Bottom Tabs ── */
+.tab-bar {
+  display: flex;
+  border-top: 1px solid #2a2724;
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 4px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 52px;
+  transition: color 0.2s;
+}
+.tab-btn .tab-icon { font-size: 18px; }
+.tab-btn.active { color: var(--accent); }
+.tab-btn:hover { color: var(--text); }
+
+/* ── Vocabulary Screen ── */
+.vocab-screen { padding: 0; }
+.vocab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #2a2724;
+  flex-shrink: 0;
+}
+.vocab-header h2 { font-size: 18px; }
+.vocab-actions { display: flex; gap: 8px; }
+.vocab-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px;
+}
+.vocab-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #1f1d1a;
+}
+.vocab-es { color: var(--accent); font-weight: 500; }
+.vocab-de { color: var(--text-dim); font-size: 13px; }
+.vocab-example { color: var(--text-dim); font-size: 12px; font-style: italic; margin-top: 2px; }
+.vocab-delete {
+  background: none; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 16px; padding: 4px 8px;
+}
+.vocab-delete:hover { color: var(--red); }
+.vocab-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  margin-top: 3px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.vocab-status.learning {
+  background: rgba(217,164,73,0.15);
+  color: var(--accent);
+}
+.vocab-status.mastered {
+  background: rgba(76,175,80,0.15);
+  color: #4caf50;
+}
+.vocab-progress-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.vocab-progress-dots .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #3a3632;
+}
+.vocab-progress-dots .dot.filled { background: var(--accent); }
+.vocab-progress-dots .dot.filled.mastered-dot { background: #4caf50; }
+.vocab-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--text-dim);
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* ── Add Vocab Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--bg-card);
+  border: 1px solid #2a2724;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.modal h3 { font-size: 18px; margin-bottom: 16px; color: var(--accent); }
+.modal .input-group { margin-bottom: 12px; }
+
+/* ── Review Screen ── */
+.review-screen { padding: 0; }
+.review-filter-bar {
+  display: flex;
+  gap: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2a2724;
+  flex-shrink: 0;
+}
+.review-filter-btn {
+  flex: 1;
+  background: none;
+  border: 1px solid #3a3632;
+  color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.review-filter-btn:first-child { border-radius: 8px 0 0 8px; }
+.review-filter-btn:last-child { border-radius: 0 8px 8px 0; }
+.review-filter-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.review-card-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.review-card {
+  width: 100%;
+  max-width: 320px;
+  min-height: 200px;
+  background: var(--bg-card);
+  border: 1px solid #2a2724;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  text-align: center;
+}
+.review-card:active { transform: scale(0.97); }
+.review-card .card-word { font-size: 24px; color: var(--accent); font-family: 'Fraunces', serif; }
+.review-card .card-answer { font-size: 18px; color: var(--text); margin-top: 16px; }
+.review-card .card-example { font-size: 13px; color: var(--text-dim); margin-top: 12px; font-style: italic; }
+.review-card .card-hint { font-size: 12px; color: var(--text-dim); margin-top: 20px; }
+.review-card .card-srs-info {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #2a2724;
+  width: 100%;
+}
+.review-controls {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  flex-shrink: 0;
+}
+.review-controls .btn { flex: 1; }
+.btn-correct { background: #4caf50; color: #fff; border-color: #4caf50; }
+.btn-correct:hover { background: #43a047; }
+.btn-wrong { background: var(--red); color: #fff; border-color: var(--red); }
+.btn-wrong:hover { opacity: 0.9; }
+.review-progress {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 8px;
+  flex-shrink: 0;
+}
+.review-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* ── History Screen ── */
+.history-screen { padding: 0; }
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px;
+}
+.history-item {
+  padding: 14px 0;
+  border-bottom: 1px solid #1f1d1a;
+  cursor: pointer;
+}
+.history-item:hover { opacity: 0.8; }
+.history-date { font-size: 12px; color: var(--text-dim); }
+.history-preview { font-size: 14px; color: var(--text); margin-top: 4px; }
+.history-score {
+  font-size: 12px;
+  margin-top: 4px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg-input);
+}
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--text-dim);
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* ── Settings Screen ── */
+.settings-screen {
+  padding: 16px;
+  overflow-y: auto;
+}
+.settings-section {
+  margin-bottom: 24px;
+}
+.settings-section h3 {
+  font-size: 14px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}
+.settings-item label { font-size: 14px; }
+.settings-item select {
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid #3a3632;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+}
+.back-btn {
+  background: none; border: none; color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  font-size: 14px; cursor: pointer; padding: 8px 0;
+  margin-bottom: 16px;
+}
+.back-btn:hover { text-decoration: underline; }
+
+/* ── Level Up Modal ── */
+.levelup-modal {
+  text-align: center;
+}
+.levelup-modal .new-level {
+  font-size: 48px;
+  color: var(--accent);
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  margin: 16px 0;
+}
+.levelup-modal p { color: var(--text-dim); margin-bottom: 20px; }
+.levelup-actions { display: flex; gap: 12px; }
+.levelup-actions .btn { flex: 1; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3a3632; border-radius: 4px; }
+
+/* ── CSV textarea ── */
+.csv-area {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  background: var(--bg-input);
+  border: 1px solid #3a3632;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+}
+.csv-area:focus { border-color: var(--accent); }
+
+/* ── Topic Chips ── */
+.topic-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  border: 1px solid #3a3632;
+  background: var(--bg-input);
+  color: var(--text-dim);
+  transition: all 0.2s;
+  user-select: none;
+}
+.topic-chip.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.topic-chip .chip-remove {
+  font-size: 14px;
+  margin-left: 2px;
+  opacity: 0.6;
+}
+.topic-chip .chip-remove:hover { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- ── Setup Screen ── -->
+  <div id="setup-screen" class="screen setup-screen active">
+    <h2>Habla</h2>
+    <p class="subtitle">Lerne Spanisch durch Konversation</p>
+    <div class="setup-form">
+      <div class="input-group">
+        <label>OpenAI API Key</label>
+        <input type="password" id="api-key-input" class="input-field" placeholder="sk-...">
+      </div>
+      <div class="security-note">
+        &#x1f512; Dein API Key wird nur auf diesem Ger&auml;t gespeichert und niemals an andere Server weitergegeben. Nur Calls an api.openai.com.
+      </div>
+      <button class="btn btn-full" onclick="saveApiKey()">Los geht's</button>
+    </div>
+  </div>
+
+  <!-- ── Main App ── -->
+  <div id="main-app" style="display:none; flex-direction:column; height:100%;">
+    <!-- Header -->
+    <div class="header">
+      <h1>Habla</h1>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="level-badge" id="level-badge">A1</span>
+        <button class="settings-btn" onclick="showScreen('settings')" title="Einstellungen">&#x2699;</button>
+      </div>
+    </div>
+
+    <!-- Tip Banner -->
+    <div class="tip-banner" id="tip-banner" style="display:none;">
+      <span class="tip-icon">&#x1f4a1;</span>
+      <span class="tip-text" id="tip-text"></span>
+      <button class="tip-close" onclick="closeTip()">&times;</button>
+    </div>
+
+    <!-- Screens -->
+    <!-- Chat -->
+    <div id="chat-screen" class="screen active">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-bar">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Escribe en espa&ntilde;ol..." onkeydown="if(event.key==='Enter')sendMessage()">
+        <button class="mic-btn" id="mic-btn" onclick="toggleRecording()" title="Mikrofon">&#x1f3a4;</button>
+        <button class="send-btn" onclick="sendMessage()" title="Senden">&#x27A4;</button>
+      </div>
+    </div>
+
+    <!-- Vocabulary -->
+    <div id="vocab-screen" class="screen vocab-screen">
+      <div class="vocab-header">
+        <h2>Vokabeln</h2>
+        <div class="vocab-actions">
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('txt-file-input').click()">TXT Import</button>
+          <button class="btn btn-sm btn-outline" onclick="showModal('csv-modal')">CSV</button>
+          <button class="btn btn-sm" onclick="showModal('add-vocab-modal')">+ Neu</button>
+          <input type="file" id="txt-file-input" accept=".txt,.csv,.tsv" style="display:none" onchange="importTxtFile(this)">
+        </div>
+      </div>
+      <div class="vocab-list" id="vocab-list"></div>
+    </div>
+
+    <!-- Review -->
+    <div id="review-screen" class="screen review-screen">
+      <div class="review-filter-bar">
+        <button class="review-filter-btn active" data-filter="due" onclick="setReviewFilter('due')">F&auml;llig <span id="review-count-due"></span></button>
+        <button class="review-filter-btn" data-filter="all" onclick="setReviewFilter('all')">Alle</button>
+        <button class="review-filter-btn" data-filter="mastered" onclick="setReviewFilter('mastered')">Gemeistert</button>
+      </div>
+      <div class="review-card-container" id="review-container"></div>
+      <div class="review-controls" id="review-controls" style="display:none;">
+        <button class="btn btn-wrong" onclick="reviewAnswer(false)">Falsch</button>
+        <button class="btn btn-correct" onclick="reviewAnswer(true)">Richtig</button>
+      </div>
+      <div class="review-progress" id="review-progress"></div>
+    </div>
+
+    <!-- History -->
+    <div id="history-screen" class="screen history-screen">
+      <div style="padding:16px;border-bottom:1px solid #2a2724;flex-shrink:0;">
+        <h2 style="font-size:18px;">Verlauf</h2>
+      </div>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <!-- Settings -->
+    <div id="settings-screen" class="screen settings-screen">
+      <button class="back-btn" onclick="showScreen('chat')">&larr; Zur&uuml;ck</button>
+      <h2 style="font-size:20px;margin-bottom:20px;">Einstellungen</h2>
+
+      <div class="settings-section">
+        <h3>API Key</h3>
+        <div class="settings-item">
+          <label>OpenAI Key</label>
+          <button class="btn btn-sm btn-outline" onclick="showModal('change-key-modal')">&#xC4;ndern</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Level</h3>
+        <div class="settings-item">
+          <label>Aktuelles Niveau</label>
+          <select id="level-select" onchange="setLevel(this.value)">
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Themen &amp; Vokabel-Auswahl</h3>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">W&auml;hle bevorzugte Themen f&uuml;r die Konversation. Pro Chat werden ~30 Vokabeln intelligent ausgew&auml;hlt.</p>
+        <div id="topics-grid" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+        <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+          <label>Eigenes Thema hinzuf&uuml;gen</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="custom-topic-input" class="input-field" placeholder="z.B. Kochen, Musik..." style="flex:1;padding:8px 12px;">
+            <button class="btn btn-sm" onclick="addCustomTopic()">+</button>
+          </div>
+        </div>
+        <div class="settings-item">
+          <label>Vokabeln pro Chat</label>
+          <select id="vocab-limit-select" onchange="setVocabLimit(this.value)">
+            <option value="20">20 (sparsam)</option>
+            <option value="30" selected>30 (empfohlen)</option>
+            <option value="50">50 (mehr Vielfalt)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Daten</h3>
+        <div class="settings-item">
+          <label>Chat-Verlauf l&ouml;schen</label>
+          <button class="btn btn-sm btn-danger" onclick="clearHistory()">L&ouml;schen</button>
+        </div>
+        <div class="settings-item">
+          <label>Alle Daten l&ouml;schen</label>
+          <button class="btn btn-sm btn-danger" onclick="clearAllData()">Alles l&ouml;schen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="chat" onclick="showScreen('chat')">
+        <span class="tab-icon">&#x1F4AC;</span>Chat
+      </button>
+      <button class="tab-btn" data-tab="vocab" onclick="showScreen('vocab')">
+        <span class="tab-icon">&#x1F4DA;</span>Vokabeln
+      </button>
+      <button class="tab-btn" data-tab="review" onclick="showScreen('review')">
+        <span class="tab-icon">&#x1F501;</span>Wiederholen
+      </button>
+      <button class="tab-btn" data-tab="history" onclick="showScreen('history')">
+        <span class="tab-icon">&#x1F4C3;</span>Verlauf
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modals ── -->
+<!-- Add Vocab Modal -->
+<div class="modal-overlay" id="add-vocab-modal">
+  <div class="modal">
+    <h3>Vokabel hinzuf&uuml;gen</h3>
+    <div class="input-group">
+      <label>Spanisch</label>
+      <input type="text" id="new-vocab-es" class="input-field" placeholder="hablar">
+    </div>
+    <div class="input-group">
+      <label>Deutsch</label>
+      <input type="text" id="new-vocab-de" class="input-field" placeholder="sprechen">
+    </div>
+    <div class="input-group">
+      <label>Beispielsatz (optional)</label>
+      <input type="text" id="new-vocab-ex" class="input-field" placeholder="Yo quiero hablar espa&ntilde;ol.">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-outline" style="flex:1" onclick="hideModal('add-vocab-modal')">Abbrechen</button>
+      <button class="btn" style="flex:1" onclick="addVocab()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- CSV Import Modal -->
+<div class="modal-overlay" id="csv-modal">
+  <div class="modal">
+    <h3>CSV Import</h3>
+    <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">Format: Spanisch,Deutsch,Beispielsatz (eine Vokabel pro Zeile)</p>
+    <textarea class="csv-area" id="csv-input" placeholder="hablar,sprechen,Yo quiero hablar espa&ntilde;ol.
+comer,essen,&iquest;Quieres comer algo?
+vivir,leben,Vivo en Hamburgo."></textarea>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-outline" style="flex:1" onclick="hideModal('csv-modal')">Abbrechen</button>
+      <button class="btn" style="flex:1" onclick="importCSV()">Importieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Key Modal -->
+<div class="modal-overlay" id="change-key-modal">
+  <div class="modal">
+    <h3>API Key &auml;ndern</h3>
+    <div class="input-group">
+      <label>Neuer OpenAI API Key</label>
+      <input type="password" id="new-api-key" class="input-field" placeholder="sk-...">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-outline" style="flex:1" onclick="hideModal('change-key-modal')">Abbrechen</button>
+      <button class="btn" style="flex:1" onclick="changeApiKey()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Level Up Modal -->
+<div class="modal-overlay" id="levelup-modal">
+  <div class="modal levelup-modal">
+    <h3>&#x1f389; Gl&uuml;ckwunsch!</h3>
+    <p>Du hast dich verbessert! Bereit f&uuml;r das n&auml;chste Level?</p>
+    <div class="new-level" id="new-level-text">A2</div>
+    <div class="levelup-actions">
+      <button class="btn btn-outline" onclick="hideModal('levelup-modal')">Noch nicht</button>
+      <button class="btn" onclick="confirmLevelUp()">Aufsteigen!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+const LEVELS = ['A1','A2','B1','B2','C1'];
+const API_BASE = 'https://api.openai.com/v1';
+let state = {
+  apiKey: '',
+  level: 'A1',
+  vocabulary: [],
+  history: [],
+  stats: { sessions: 0, consecutiveHigh: 0 },
+  tipsSeen: [],
+  topics: [],          // active topic strings
+  customTopics: [],    // user-added topics
+  vocabLimit: 30,      // how many vocabs to inject per chat
+  vocabSeen: [],       // indices of recently used vocabs (for rotation)
+  currentChat: [],
+  currentSessionId: null,
+  recording: false,
+  mediaRecorder: null,
+  audioChunks: [],
+  reviewIndex: 0,
+  reviewRevealed: false,
+};
+
+// ── Tips ──
+const TIPS = {
+  A1: [
+    'Im Spanischen gibt es zwei Geschlechter: el (männlich) und la (weiblich). Z.B. el libro, la casa.',
+    '"Ser" nutzt man für permanente Eigenschaften (Yo soy alemán), "estar" für Zustände und Orte (Estoy en casa).',
+    'Einfache Fragen beginnen oft mit: ¿Qué? (Was?), ¿Quién? (Wer?), ¿Dónde? (Wo?)',
+    'Regelmäßige Verben enden auf -ar, -er oder -ir. Lerne zuerst die -ar Verben!',
+    'Übung: Sage jeden Tag 3 Sätze auf Spanisch über deinen Alltag.',
+    '"Me gusta" heißt "mir gefällt" — me gusta el café, me gustan los libros.',
+    'Verneinung ist einfach: Setze "no" vor das Verb. No hablo inglés.',
+    'Die Zahlen 1-10: uno, dos, tres, cuatro, cinco, seis, siete, ocho, nueve, diez.',
+    'Höflichkeit: "por favor" (bitte), "gracias" (danke), "de nada" (gern geschehen).',
+    'Artikel im Plural: el→los, la→las. Los libros, las casas.',
+    '"Hay" bedeutet "es gibt" — Hay un problema. ¿Hay café?',
+    'Possessivpronomen: mi (mein), tu (dein), su (sein/ihr). Mi casa, tu libro.',
+    'Tageszeiten: Buenos días (morgens), Buenas tardes (nachmittags), Buenas noches (abends).',
+    '"Tener" (haben) ist unregelmäßig: tengo, tienes, tiene, tenemos, tenéis, tienen.',
+    'Sprich langsam und deutlich — Spanisch wird fast so ausgesprochen wie es geschrieben wird!',
+  ],
+  A2: [
+    'Pretérito indefinido (Vergangenheit): hablé, comí, viví — für abgeschlossene Handlungen.',
+    'Reflexive Verben: Me llamo (ich heiße), me levanto (ich stehe auf).',
+    'Direktes Objektpronomen: lo, la, los, las — Lo tengo (Ich habe es).',
+    'Vergleiche: más ... que (mehr als), menos ... que (weniger als), tan ... como (so wie).',
+    'Imperativo: ¡Habla! (Sprich!), ¡Come! (Iss!), ¡Escribe! (Schreib!)',
+    '"Ir a + Infinitiv" für die nahe Zukunft: Voy a comer (Ich werde essen).',
+    'Wetter: Hace sol (sonnig), Hace frío (kalt), Llueve (es regnet).',
+    'Por vs. Para: "por" = wegen/durch, "para" = für/um zu.',
+    'Pretérito imperfecto: hablaba, comía — für Gewohnheiten in der Vergangenheit.',
+    'Übung: Beschreibe dein Wochenende auf Spanisch mit mindestens 5 Sätzen.',
+    'Gerundio: estoy hablando (ich spreche gerade). Estar + Verb auf -ando/-iendo.',
+    'Konnektoren: pero (aber), porque (weil), aunque (obwohl), sin embargo (jedoch).',
+    'Diminutive: -ito/-ita machen Wörter klein/süß — casita, momentito.',
+    'Unregelmäßige Verben üben: ir (voy), ser (soy), hacer (hago), poder (puedo).',
+    'Übung: Höre spanische Podcasts für Anfänger — auch wenn du nicht alles verstehst!',
+  ],
+  B1: [
+    'Subjuntivo: Es wichtig für Wünsche und Zweifel — Quiero que hables español.',
+    'Condicional: hablaría, comería — "Ich würde sprechen/essen".',
+    'Pretérito pluscuamperfecto: había hablado — für die Vorvergangenheit.',
+    'Relativsätze: que, quien, donde, cual — El libro que leí fue interesante.',
+    'Übung: Schreibe eine kurze Geschichte auf Spanisch (10-15 Sätze).',
+    'Idiomatische Ausdrücke: "Estar en las nubes" = verträumt sein.',
+    'Futuro simple: hablaré, comeré, viviré — weniger gebräuchlich als ir a + Inf.',
+    'Ser vs. Estar mit Adjektiven: Ser listo = clever sein, Estar listo = bereit sein.',
+    'Indirekte Rede: Dijo que vendría — Er sagte, er würde kommen.',
+    'Perífrasis verbales: Dejar de + Inf (aufhören), Volver a + Inf (wieder tun).',
+    'Konjunktionen für Nebensätze: antes de que, después de que, cuando + Subjuntivo.',
+    'Übung: Diskutiere ein aktuelles Thema auf Spanisch mit Pro und Contra.',
+    'Phrasal verbs auf Spanisch: darse cuenta (bemerken), llevarse bien (sich gut verstehen).',
+    'Übung: Lies eine spanische Nachrichtenseite und fasse einen Artikel zusammen.',
+    'Voz pasiva: El libro fue escrito por Cervantes — wird seltener als im Deutschen benutzt.',
+  ],
+};
+TIPS.B2 = TIPS.B1;
+TIPS.C1 = TIPS.B1;
+
+// ── LocalStorage Helpers ──
+function load(key, fallback) {
+  try { const v = localStorage.getItem('habla_' + key); return v ? JSON.parse(v) : fallback; }
+  catch { return fallback; }
+}
+function save(key, val) {
+  localStorage.setItem('habla_' + key, JSON.stringify(val));
+}
+
+// ── Init ──
+function init() {
+  state.apiKey = load('apikey', '');
+  state.level = load('level', 'A1');
+  state.vocabulary = load('vocabulary', []);
+  state.history = load('history', []);
+  state.stats = load('stats', { sessions: 0, consecutiveHigh: 0 });
+  state.tipsSeen = load('tips_seen', []);
+  state.topics = load('topics', []);
+  state.customTopics = load('custom_topics', []);
+  state.vocabLimit = load('vocab_limit', 30);
+  state.vocabSeen = load('vocab_seen', []);
+
+  if (state.apiKey) {
+    document.getElementById('setup-screen').classList.remove('active');
+    document.getElementById('main-app').style.display = 'flex';
+    updateLevelBadge();
+    showTip();
+    loadLastSession();
+    renderVocabList();
+    renderTopics();
+    document.getElementById('vocab-limit-select').value = state.vocabLimit;
+  }
+}
+
+// ── API Key ──
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) return alert('Bitte gib deinen API Key ein.');
+  state.apiKey = key;
+  save('apikey', key);
+  document.getElementById('setup-screen').classList.remove('active');
+  document.getElementById('main-app').style.display = 'flex';
+  updateLevelBadge();
+  showTip();
+  addSystemMessage('Willkommen bei Habla! Schreib oder sprich auf Spanisch, um zu beginnen.');
+}
+
+function changeApiKey() {
+  const key = document.getElementById('new-api-key').value.trim();
+  if (!key) return;
+  state.apiKey = key;
+  save('apikey', key);
+  hideModal('change-key-modal');
+  document.getElementById('new-api-key').value = '';
+}
+
+// ── Level ──
+function updateLevelBadge() {
+  document.getElementById('level-badge').textContent = state.level;
+  document.getElementById('level-select').value = state.level;
+}
+
+function setLevel(level) {
+  state.level = level;
+  save('level', level);
+  updateLevelBadge();
+}
+
+// ── Topics ──
+const DEFAULT_TOPICS = [
+  'Reisen', 'Essen & Trinken', 'Arbeit & Beruf', 'Familie',
+  'Einkaufen', 'Wohnen', 'Freizeit', 'Gesundheit',
+  'Wetter', 'Smalltalk', 'Kultur', 'Sport',
+];
+
+function renderTopics() {
+  const grid = document.getElementById('topics-grid');
+  const allTopics = [...DEFAULT_TOPICS, ...state.customTopics];
+  grid.innerHTML = allTopics.map(t => {
+    const active = state.topics.includes(t);
+    const isCustom = state.customTopics.includes(t);
+    return `<span class="topic-chip ${active ? 'active' : ''}" onclick="toggleTopic('${esc(t)}')">${esc(t)}${isCustom ? '<span class="chip-remove" onclick="event.stopPropagation();removeCustomTopic(\'' + esc(t) + '\')">&times;</span>' : ''}</span>`;
+  }).join('');
+}
+
+function toggleTopic(topic) {
+  const idx = state.topics.indexOf(topic);
+  if (idx >= 0) state.topics.splice(idx, 1);
+  else state.topics.push(topic);
+  save('topics', state.topics);
+  renderTopics();
+}
+
+function addCustomTopic() {
+  const input = document.getElementById('custom-topic-input');
+  const topic = input.value.trim();
+  if (!topic) return;
+  if (DEFAULT_TOPICS.includes(topic) || state.customTopics.includes(topic)) {
+    if (!state.topics.includes(topic)) toggleTopic(topic);
+    input.value = '';
+    return;
+  }
+  state.customTopics.push(topic);
+  state.topics.push(topic);
+  save('custom_topics', state.customTopics);
+  save('topics', state.topics);
+  input.value = '';
+  renderTopics();
+}
+
+function removeCustomTopic(topic) {
+  state.customTopics = state.customTopics.filter(t => t !== topic);
+  state.topics = state.topics.filter(t => t !== topic);
+  save('custom_topics', state.customTopics);
+  save('topics', state.topics);
+  renderTopics();
+}
+
+function setVocabLimit(val) {
+  state.vocabLimit = parseInt(val);
+  save('vocab_limit', state.vocabLimit);
+}
+
+function checkLevelUp() {
+  if (state.stats.consecutiveHigh >= 10) {
+    const idx = LEVELS.indexOf(state.level);
+    if (idx < LEVELS.length - 1) {
+      const next = LEVELS[idx + 1];
+      document.getElementById('new-level-text').textContent = next;
+      showModal('levelup-modal');
+    }
+  }
+}
+
+function confirmLevelUp() {
+  const idx = LEVELS.indexOf(state.level);
+  if (idx < LEVELS.length - 1) {
+    setLevel(LEVELS[idx + 1]);
+    state.stats.consecutiveHigh = 0;
+    save('stats', state.stats);
+  }
+  hideModal('levelup-modal');
+}
+
+// ── Tips ──
+function showTip() {
+  const levelTips = TIPS[state.level] || TIPS.A1;
+  const unseen = levelTips.filter((_, i) => !state.tipsSeen.includes(state.level + '_' + i));
+  if (unseen.length === 0) {
+    state.tipsSeen = state.tipsSeen.filter(t => !t.startsWith(state.level + '_'));
+    save('tips_seen', state.tipsSeen);
+    return showTip();
+  }
+  const idx = levelTips.indexOf(unseen[Math.floor(Math.random() * unseen.length)]);
+  document.getElementById('tip-text').textContent = levelTips[idx];
+  document.getElementById('tip-banner').style.display = 'flex';
+  state.tipsSeen.push(state.level + '_' + idx);
+  save('tips_seen', state.tipsSeen);
+}
+
+function closeTip() {
+  document.getElementById('tip-banner').style.display = 'none';
+}
+
+// ── Screen Navigation ──
+function showScreen(name) {
+  document.querySelectorAll('#main-app .screen').forEach(s => s.classList.remove('active'));
+  const screen = document.getElementById(name + '-screen');
+  if (screen) screen.classList.add('active');
+
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  const tab = document.querySelector(`.tab-btn[data-tab="${name}"]`);
+  if (tab) tab.classList.add('active');
+
+  if (name === 'vocab') renderVocabList();
+  if (name === 'review') startReview();
+  if (name === 'history') renderHistory();
+}
+
+// ── Modal ──
+function showModal(id) { document.getElementById(id).classList.add('active'); }
+function hideModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ── Chat ──
+// ── Smart Vocab Selection ──
+// Picks a subset of vocabs, prioritizing:
+// 1. Vocabs matching active topics (keyword match in es/de)
+// 2. Vocabs not recently used (rotation)
+// 3. Random fill for variety
+function selectVocabsForChat() {
+  const limit = state.vocabLimit || 30;
+  const all = state.vocabulary;
+  if (all.length <= limit) return all;
+
+  const selected = new Set();
+  const topicKeywords = state.topics.map(t => t.toLowerCase());
+
+  // Score each vocab: topic match = 3, unseen = 2, random = 1
+  const scored = all.map((v, i) => {
+    let score = 1 + Math.random(); // base random score
+    const text = (v.es + ' ' + v.de).toLowerCase();
+    // Boost if matches an active topic
+    if (topicKeywords.length > 0 && topicKeywords.some(kw => text.includes(kw))) {
+      score += 3;
+    }
+    // Boost if not recently seen
+    if (!state.vocabSeen.includes(i)) {
+      score += 2;
+    }
+    return { index: i, score, vocab: v };
+  });
+
+  // Sort by score descending, pick top N
+  scored.sort((a, b) => b.score - a.score);
+  const picks = scored.slice(0, limit);
+
+  // Track seen vocabs (keep last 2x limit for rotation window)
+  const newSeen = picks.map(p => p.index);
+  state.vocabSeen = [...state.vocabSeen, ...newSeen].slice(-(limit * 2));
+  save('vocab_seen', state.vocabSeen);
+
+  return picks.map(p => p.vocab);
+}
+
+function getSystemPrompt() {
+  const vocabs = selectVocabsForChat();
+  const vocabStr = vocabs.map(v => `${v.es} = ${v.de}`).join(', ');
+  const topicStr = state.topics.length > 0
+    ? `\nBevorzugte Gesprächsthemen: ${state.topics.join(', ')}.`
+    : '';
+
+  return `Du bist ein geduldiger Spanischlehrer für Anfänger (Niveau: ${state.level}).
+Antworte immer auf Spanisch, aber erkläre Fehler kurz auf Deutsch.
+${vocabStr ? 'Nutze bevorzugt Vokabeln aus dieser Auswahl: ' + vocabStr + '.' : ''}
+Baue Konversationsthemen rund um diese Vokabeln auf.${topicStr}
+Gib nach jeder Nutzerantwort kurzes Aussprache-/Grammatik-Feedback.
+Passe Satzkomplexität und Tempo dem Level ${state.level} an.
+Halte deine Antworten kurz und klar (2-4 Sätze).`;
+}
+
+function addChatBubble(role, text) {
+  const el = document.createElement('div');
+  if (role === 'user') {
+    el.className = 'msg msg-user';
+    el.textContent = text;
+  } else if (role === 'assistant') {
+    el.className = 'msg msg-ai';
+    el.innerHTML = formatMessage(text);
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'save-btn';
+    saveBtn.textContent = '+';
+    saveBtn.title = 'Als Vokabel speichern';
+    saveBtn.onclick = () => saveFromChat(text);
+    el.appendChild(saveBtn);
+  } else if (role === 'feedback') {
+    el.className = 'msg msg-feedback';
+    el.innerHTML = text;
+  } else {
+    el.className = 'msg msg-system';
+    el.textContent = text;
+  }
+  document.getElementById('chat-messages').appendChild(el);
+  scrollChat();
+}
+
+function formatMessage(text) {
+  return text.replace(/\n/g, '<br>');
+}
+
+function addSystemMessage(text) {
+  addChatBubble('system', text);
+}
+
+function showTyping() {
+  const el = document.createElement('div');
+  el.className = 'msg msg-typing';
+  el.id = 'typing-indicator';
+  el.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+  document.getElementById('chat-messages').appendChild(el);
+  scrollChat();
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function scrollChat() {
+  const c = document.getElementById('chat-messages');
+  setTimeout(() => c.scrollTop = c.scrollHeight, 50);
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addChatBubble('user', text);
+  state.currentChat.push({ role: 'user', content: text });
+  await getAIResponse();
+}
+
+async function getAIResponse() {
+  showTyping();
+  try {
+    const messages = [
+      { role: 'system', content: getSystemPrompt() },
+      ...state.currentChat.slice(-20)
+    ];
+    const res = await fetch(API_BASE + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey,
+      },
+      body: JSON.stringify({ model: 'gpt-4o', messages, max_tokens: 500 }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'API Fehler: ' + res.status);
+    }
+    const data = await res.json();
+    const reply = data.choices[0].message.content;
+    hideTyping();
+    addChatBubble('assistant', reply);
+    state.currentChat.push({ role: 'assistant', content: reply });
+    saveCurrentSession();
+  } catch (e) {
+    hideTyping();
+    addChatBubble('system', 'Fehler: ' + e.message);
+  }
+}
+
+// ── Audio Recording ──
+async function toggleRecording() {
+  if (state.recording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.audioChunks = [];
+    state.mediaRecorder = new MediaRecorder(stream, { mimeType: getMimeType() });
+    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.audioChunks.push(e.data); };
+    state.mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      processAudio();
+    };
+    state.mediaRecorder.start();
+    state.recording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+  } catch (e) {
+    addChatBubble('system', 'Mikrofon-Zugriff fehlgeschlagen. Bitte erlaube den Zugriff.');
+  }
+}
+
+function getMimeType() {
+  if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) return 'audio/webm;codecs=opus';
+  if (MediaRecorder.isTypeSupported('audio/webm')) return 'audio/webm';
+  if (MediaRecorder.isTypeSupported('audio/mp4')) return 'audio/mp4';
+  return '';
+}
+
+function stopRecording() {
+  if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
+    state.mediaRecorder.stop();
+  }
+  state.recording = false;
+  document.getElementById('mic-btn').classList.remove('recording');
+}
+
+async function processAudio() {
+  const mimeType = state.mediaRecorder.mimeType || 'audio/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+  const blob = new Blob(state.audioChunks, { type: mimeType });
+  addChatBubble('system', 'Transkribiere Audio...');
+
+  try {
+    const formData = new FormData();
+    formData.append('file', blob, 'audio.' + ext);
+    formData.append('model', 'whisper-1');
+    formData.append('language', 'es');
+    formData.append('response_format', 'verbose_json');
+
+    const res = await fetch(API_BASE + '/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + state.apiKey },
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Whisper API Fehler: ' + res.status);
+    }
+    const data = await res.json();
+    const transcript = data.text;
+    if (!transcript || !transcript.trim()) {
+      addChatBubble('system', 'Kein Sprachinhalt erkannt. Versuche es nochmal.');
+      return;
+    }
+
+    addChatBubble('user', transcript);
+    state.currentChat.push({ role: 'user', content: transcript });
+
+    // Get pronunciation feedback
+    await getPronunciationFeedback(transcript);
+    // Then get conversational response
+    await getAIResponse();
+  } catch (e) {
+    addChatBubble('system', 'Fehler bei der Transkription: ' + e.message);
+  }
+}
+
+async function getPronunciationFeedback(transcript) {
+  try {
+    const res = await fetch(API_BASE + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: `Du bist ein Aussprache-Coach für Spanisch (Niveau: ${state.level}).
+Analysiere die folgende Whisper-Transkription und gib kurzes Feedback zur Aussprache.
+Formatiere dein Feedback so:
+- Korrekt erkannte Wörter/Phrasen markiere mit [OK]
+- Leichte Abweichungen mit [~] und kurzer Erklärung
+- Fehler mit [!] und Korrektur
+Halte dich kurz (2-3 Zeilen). Antworte auf Deutsch.` },
+          { role: 'user', content: 'Transkription: "' + transcript + '"' }
+        ],
+        max_tokens: 200,
+      }),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const feedback = data.choices[0].message.content;
+    const colored = feedback
+      .replace(/\[OK\]/g, '<span class="feedback-correct">[OK]</span>')
+      .replace(/\[~\]/g, '<span class="feedback-close">[~]</span>')
+      .replace(/\[!\]/g, '<span class="feedback-wrong">[!]</span>')
+      .replace(/\n/g, '<br>');
+    addChatBubble('feedback', colored);
+  } catch (e) {
+    // Silently fail — feedback is nice-to-have
+  }
+}
+
+// ── Session Management ──
+function generateSessionId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function saveCurrentSession() {
+  if (!state.currentSessionId) state.currentSessionId = generateSessionId();
+  const session = {
+    id: state.currentSessionId,
+    date: new Date().toISOString(),
+    messages: state.currentChat.slice(),
+    level: state.level,
+  };
+  // Update or add to history
+  const idx = state.history.findIndex(h => h.id === session.id);
+  if (idx >= 0) state.history[idx] = session;
+  else state.history.unshift(session);
+  // Keep last 20
+  if (state.history.length > 20) state.history = state.history.slice(0, 20);
+  save('history', state.history);
+}
+
+function loadLastSession() {
+  if (state.history.length > 0) {
+    const last = state.history[0];
+    state.currentChat = last.messages.slice();
+    state.currentSessionId = last.id;
+    last.messages.forEach(m => {
+      addChatBubble(m.role, m.content);
+    });
+    addSystemMessage('Letzte Session geladen. Schreib weiter oder starte eine neue Konversation.');
+  } else {
+    addSystemMessage('Willkommen bei Habla! Schreib oder sprich auf Spanisch, um zu beginnen.');
+  }
+}
+
+async function endSession() {
+  if (state.currentChat.length < 4) return; // Need at least some conversation
+  try {
+    const res = await fetch(API_BASE + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: `Bewerte diese Spanisch-Konversation eines ${state.level}-Schülers auf einer Skala von 0-10.
+Berücksichtige: Grammatik, Vokabular, Satzbau, Verständnis.
+Antworte NUR mit einer Zahl von 0 bis 10.` },
+          ...state.currentChat.slice(-20),
+        ],
+        max_tokens: 5,
+      }),
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const scoreText = data.choices[0].message.content.trim();
+    const score = parseInt(scoreText);
+    if (!isNaN(score) && score >= 0 && score <= 10) {
+      // Update session with score
+      const session = state.history.find(h => h.id === state.currentSessionId);
+      if (session) {
+        session.score = score;
+        save('history', state.history);
+      }
+      // Track consecutive high scores
+      if (score > 7) {
+        state.stats.consecutiveHigh++;
+      } else {
+        state.stats.consecutiveHigh = 0;
+      }
+      state.stats.sessions++;
+      save('stats', state.stats);
+      checkLevelUp();
+    }
+  } catch (e) {
+    // Silently fail
+  }
+  // Start new session
+  state.currentChat = [];
+  state.currentSessionId = generateSessionId();
+}
+
+// ── Vocabulary ──
+function isDuplicate(es, de) {
+  const esN = es.toLowerCase().trim();
+  const deN = de.toLowerCase().trim();
+  return state.vocabulary.some(v => v.es.toLowerCase().trim() === esN && v.de.toLowerCase().trim() === deN);
+}
+
+function addVocab() {
+  const es = document.getElementById('new-vocab-es').value.trim();
+  const de = document.getElementById('new-vocab-de').value.trim();
+  const ex = document.getElementById('new-vocab-ex').value.trim();
+  if (!es || !de) return alert('Bitte Spanisch und Deutsch eingeben.');
+  if (isDuplicate(es, de)) return alert('Diese Vokabel existiert bereits.');
+  state.vocabulary.push({ es, de, example: ex, added: new Date().toISOString() });
+  save('vocabulary', state.vocabulary);
+  document.getElementById('new-vocab-es').value = '';
+  document.getElementById('new-vocab-de').value = '';
+  document.getElementById('new-vocab-ex').value = '';
+  hideModal('add-vocab-modal');
+  renderVocabList();
+}
+
+function importCSV() {
+  const text = document.getElementById('csv-input').value.trim();
+  if (!text) return;
+  const lines = text.split('\n').filter(l => l.trim());
+  let count = 0, skipped = 0;
+  lines.forEach(line => {
+    const parts = line.split(',').map(p => p.trim());
+    if (parts.length >= 2) {
+      if (isDuplicate(parts[0], parts[1])) { skipped++; return; }
+      state.vocabulary.push({
+        es: parts[0],
+        de: parts[1],
+        example: parts[2] || '',
+        added: new Date().toISOString(),
+      });
+      count++;
+    }
+  });
+  save('vocabulary', state.vocabulary);
+  document.getElementById('csv-input').value = '';
+  hideModal('csv-modal');
+  renderVocabList();
+  const msg = count + ' Vokabeln importiert!' + (skipped ? ' (' + skipped + ' Duplikate übersprungen)' : '');
+  addChatBubble('system', msg);
+}
+
+function importTxtFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split('\n').filter(l => l.trim());
+    let count = 0, skipped = 0;
+    lines.forEach(line => {
+      // Skip metadata lines like #separator, #html, etc.
+      if (line.startsWith('#')) return;
+      // Tab-separated: Deutsch\tSpanisch
+      const parts = line.split('\t').map(p => p.trim());
+      if (parts.length >= 2) {
+        const de = parts[0];
+        const es = parts[1];
+        if (isDuplicate(es, de)) { skipped++; return; }
+        state.vocabulary.push({
+          es, de, example: '',
+          added: new Date().toISOString(),
+        });
+        count++;
+      }
+    });
+    save('vocabulary', state.vocabulary);
+    renderVocabList();
+    const msg = count + ' Vokabeln importiert!' + (skipped ? ' (' + skipped + ' Duplikate übersprungen)' : '');
+    addChatBubble('system', msg);
+    showScreen('vocab');
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+function saveFromChat(text) {
+  const es = text.split(/[.!?]/)[0].trim().slice(0, 60);
+  if (!es) return;
+  state.vocabulary.push({ es, de: '(aus Chat)', example: text.slice(0, 100), added: new Date().toISOString() });
+  save('vocabulary', state.vocabulary);
+  // Brief visual feedback
+  const btn = event.target;
+  btn.textContent = '✓';
+  btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = '+'; btn.style.background = 'var(--accent)'; }, 1000);
+}
+
+function deleteVocab(index) {
+  state.vocabulary.splice(index, 1);
+  save('vocabulary', state.vocabulary);
+  renderVocabList();
+}
+
+function toggleMastered(index) {
+  const v = ensureSRS(state.vocabulary[index]);
+  if (v.mastered) {
+    v.mastered = false;
+    v.correctStreak = 0;
+  } else {
+    v.mastered = true;
+    v.correctStreak = 3;
+  }
+  save('vocabulary', state.vocabulary);
+  renderVocabList();
+}
+
+function renderVocabList() {
+  const list = document.getElementById('vocab-list');
+  if (state.vocabulary.length === 0) {
+    list.innerHTML = '<div class="vocab-empty"><p>Noch keine Vokabeln.</p><p style="margin-top:8px;font-size:12px;">Importiere via CSV oder f&uuml;ge manuell hinzu.</p></div>';
+    return;
+  }
+  const masteredCount = state.vocabulary.filter(v => ensureSRS(v).mastered).length;
+  const total = state.vocabulary.length;
+  list.innerHTML = `<div style="padding:8px 0;font-size:12px;color:var(--text-dim);">${masteredCount}/${total} gemeistert</div>` +
+  state.vocabulary.map((v, i) => {
+    ensureSRS(v);
+    const dots = [0,1,2].map(d =>
+      `<span class="dot ${d < v.correctStreak ? (v.mastered ? 'filled mastered-dot' : 'filled') : ''}"></span>`
+    ).join('');
+    const statusClass = v.mastered ? 'mastered' : 'learning';
+    const statusLabel = v.mastered ? 'Gemeistert' : `${v.correctStreak}/3`;
+    return `
+    <div class="vocab-item">
+      <div style="flex:1;min-width:0;">
+        <div class="vocab-es">${esc(v.es)}</div>
+        <div class="vocab-de">${esc(v.de)}</div>
+        ${v.example ? `<div class="vocab-example">${esc(v.example)}</div>` : ''}
+        <span class="vocab-status ${statusClass}" onclick="toggleMastered(${i})" title="Klicke zum Umschalten">
+          <span class="vocab-progress-dots">${dots}</span> ${statusLabel}
+        </span>
+      </div>
+      <button class="vocab-delete" onclick="deleteVocab(${i})" title="L&ouml;schen">&times;</button>
+    </div>
+  `}).join('');
+}
+
+// ── Review (Flashcards with SRS) ──
+// Each vocab gets: correctStreak (0-3), mastered (bool), lastReview (timestamp)
+// 3 correct in a row → mastered. Wrong resets streak to 0.
+// Users can toggle mastered status manually.
+
+function ensureSRS(v) {
+  if (v.correctStreak === undefined) v.correctStreak = 0;
+  if (v.mastered === undefined) v.mastered = false;
+  if (v.lastReview === undefined) v.lastReview = 0;
+  return v;
+}
+
+function getReviewVocabs(filter) {
+  return state.vocabulary
+    .map((v, i) => ({ ...ensureSRS(v), _idx: i }))
+    .filter(v => {
+      if (filter === 'mastered') return v.mastered;
+      if (filter === 'due') return !v.mastered;
+      return true; // 'all'
+    });
+}
+
+state.reviewFilter = 'due';
+
+function setReviewFilter(filter) {
+  state.reviewFilter = filter;
+  document.querySelectorAll('.review-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  startReview();
+}
+
+function updateReviewCounts() {
+  const due = state.vocabulary.filter(v => !ensureSRS(v).mastered).length;
+  const el = document.getElementById('review-count-due');
+  if (el) el.textContent = due > 0 ? `(${due})` : '';
+}
+
+function startReview() {
+  const container = document.getElementById('review-container');
+  const controls = document.getElementById('review-controls');
+  const progress = document.getElementById('review-progress');
+
+  updateReviewCounts();
+  const vocabs = getReviewVocabs(state.reviewFilter);
+
+  if (state.vocabulary.length === 0) {
+    container.innerHTML = '<div class="review-empty"><p>Keine Vokabeln vorhanden.</p><p style="margin-top:8px;font-size:12px;">F&uuml;ge zuerst Vokabeln hinzu.</p></div>';
+    controls.style.display = 'none';
+    progress.textContent = '';
+    return;
+  }
+
+  if (vocabs.length === 0) {
+    const msg = state.reviewFilter === 'due'
+      ? '<p>Alles gemeistert!</p><p style="margin-top:8px;font-size:12px;">Wechsle zu "Alle" oder f&uuml;ge neue Vokabeln hinzu.</p>'
+      : '<p>Keine Vokabeln in dieser Kategorie.</p>';
+    container.innerHTML = '<div class="review-empty">' + msg + '</div>';
+    controls.style.display = 'none';
+    progress.textContent = '';
+    return;
+  }
+
+  // Shuffle and prioritize: least recently reviewed first, then random
+  state.reviewOrder = vocabs.sort((a, b) => a.lastReview - b.lastReview + (Math.random() - 0.5) * 1000);
+  state.reviewIndex = 0;
+  state.reviewRevealed = false;
+  showReviewCard();
+}
+
+function showReviewCard() {
+  const container = document.getElementById('review-container');
+  const controls = document.getElementById('review-controls');
+  const progress = document.getElementById('review-progress');
+
+  if (state.reviewIndex >= state.reviewOrder.length) {
+    container.innerHTML = '<div class="review-empty"><p>Alle Karten dieser Runde durch!</p></div>';
+    controls.style.display = 'none';
+    progress.textContent = '';
+    updateReviewCounts();
+    return;
+  }
+
+  const v = state.reviewOrder[state.reviewIndex];
+  state.reviewRevealed = false;
+
+  const streakDots = [0,1,2].map(i =>
+    `<span class="dot ${i < v.correctStreak ? (v.mastered ? 'filled mastered-dot' : 'filled') : ''}"></span>`
+  ).join('');
+
+  container.innerHTML = `
+    <div class="review-card" onclick="revealCard()">
+      <div class="card-word">${esc(v.es)}</div>
+      <div class="card-answer" id="card-answer" style="display:none;">${esc(v.de)}</div>
+      ${v.example ? `<div class="card-example" id="card-example" style="display:none;">${esc(v.example)}</div>` : ''}
+      <div class="card-hint" id="card-hint">Tippe zum Aufdecken</div>
+      <div class="card-srs-info" id="card-srs-info" style="display:none;">
+        <span class="vocab-progress-dots">${streakDots}</span>
+        ${v.mastered ? ' Gemeistert' : ` ${v.correctStreak}/3 richtig`}
+      </div>
+    </div>
+  `;
+  controls.style.display = 'flex';
+  progress.textContent = `${state.reviewIndex + 1} / ${state.reviewOrder.length}`;
+}
+
+function revealCard() {
+  if (state.reviewRevealed) return;
+  state.reviewRevealed = true;
+  const ans = document.getElementById('card-answer');
+  const ex = document.getElementById('card-example');
+  const hint = document.getElementById('card-hint');
+  const srs = document.getElementById('card-srs-info');
+  if (ans) ans.style.display = 'block';
+  if (ex) ex.style.display = 'block';
+  if (hint) hint.style.display = 'none';
+  if (srs) srs.style.display = 'block';
+}
+
+function reviewAnswer(correct) {
+  if (!state.reviewRevealed) {
+    revealCard();
+    return;
+  }
+  const item = state.reviewOrder[state.reviewIndex];
+  const vocab = state.vocabulary[item._idx];
+  ensureSRS(vocab);
+
+  if (correct) {
+    vocab.correctStreak = Math.min((vocab.correctStreak || 0) + 1, 3);
+    if (vocab.correctStreak >= 3) vocab.mastered = true;
+  } else {
+    vocab.correctStreak = 0;
+    vocab.mastered = false;
+  }
+  vocab.lastReview = Date.now();
+  save('vocabulary', state.vocabulary);
+
+  state.reviewIndex++;
+  showReviewCard();
+}
+
+function reviewNext() {
+  state.reviewIndex++;
+  showReviewCard();
+}
+
+// ── History ──
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (state.history.length === 0) {
+    list.innerHTML = '<div class="history-empty"><p>Noch keine Sessions.</p><p style="margin-top:8px;font-size:12px;">Starte eine Konversation im Chat.</p></div>';
+    return;
+  }
+  list.innerHTML = state.history.map((h, i) => {
+    const d = new Date(h.date);
+    const dateStr = d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const preview = h.messages.find(m => m.role === 'assistant');
+    const scoreHTML = h.score !== undefined ? `<span class="history-score">${h.score}/10</span>` : '';
+    return `
+      <div class="history-item" onclick="loadSession(${i})">
+        <div class="history-date">${dateStr} · ${h.level || 'A1'} ${scoreHTML}</div>
+        <div class="history-preview">${preview ? esc(preview.content.slice(0, 80)) + '...' : 'Leere Session'}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function loadSession(index) {
+  const session = state.history[index];
+  if (!session) return;
+
+  // End current session first
+  if (state.currentChat.length >= 4) endSession();
+
+  state.currentChat = session.messages.slice();
+  state.currentSessionId = session.id;
+  document.getElementById('chat-messages').innerHTML = '';
+  session.messages.forEach(m => addChatBubble(m.role, m.content));
+  addSystemMessage('Session geladen. Du kannst hier weitermachen.');
+  showScreen('chat');
+}
+
+// ── Settings Actions ──
+function clearHistory() {
+  if (!confirm('Chat-Verlauf wirklich löschen?')) return;
+  state.history = [];
+  state.currentChat = [];
+  state.currentSessionId = null;
+  save('history', []);
+  document.getElementById('chat-messages').innerHTML = '';
+  addSystemMessage('Verlauf gelöscht. Starte eine neue Konversation.');
+}
+
+function clearAllData() {
+  if (!confirm('Wirklich ALLE Daten löschen? (API Key, Vokabeln, Verlauf)')) return;
+  localStorage.removeItem('habla_apikey');
+  localStorage.removeItem('habla_level');
+  localStorage.removeItem('habla_vocabulary');
+  localStorage.removeItem('habla_history');
+  localStorage.removeItem('habla_stats');
+  localStorage.removeItem('habla_tips_seen');
+  localStorage.removeItem('habla_topics');
+  localStorage.removeItem('habla_custom_topics');
+  localStorage.removeItem('habla_vocab_limit');
+  localStorage.removeItem('habla_vocab_seen');
+  location.reload();
+}
+
+// ── New Session ──
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && state.currentChat.length >= 4) {
+    endSession();
+  }
+});
+
+// ── Helpers ──
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ── Start ──
+init();
+</script>
+</body>
+</html>
