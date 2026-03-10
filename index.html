@@ -743,6 +743,14 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
 .dialog-transcript .dialog-ai-text {
   color: var(--text);
 }
+.dialog-transcript .dialog-correction {
+  color: var(--orange);
+  font-weight: 500;
+}
+.dialog-transcript .dialog-correcto {
+  color: var(--green);
+  font-weight: 500;
+}
 
 /* Orb visualizer */
 .dialog-orb {
@@ -2542,20 +2550,27 @@ async function processDialogAudio() {
     const chatData = await chatRes.json();
     const reply = chatData.choices[0].message.content;
 
-    // Save to chat
-    addChatBubble('assistant', reply);
+    // Detect correction tags
+    const isCorrection = reply.startsWith('[KORREKTUR]');
+    const isCorrect = reply.startsWith('[CORRECTO]');
+    // Strip tags for display and TTS
+    const displayReply = reply.replace(/^\[(KORREKTUR|CORRECTO)\]\s*/i, '');
+
+    // Save full reply to chat (with tag for context)
+    addChatBubble('assistant', displayReply);
     state.currentChat.push({ role: 'assistant', content: reply });
     saveCurrentSession();
 
-    // Show AI reply
+    // Show AI reply with appropriate styling
+    const cssClass = isCorrection ? 'dialog-correction' : isCorrect ? 'dialog-correcto' : 'dialog-ai-text';
     document.getElementById('dialog-transcript').innerHTML =
-      '<span class="dialog-ai-text">' + esc(reply) + '</span>';
+      '<span class="' + cssClass + '">' + esc(displayReply) + '</span>';
 
     if (!dialogState.active) return;
 
     // 3. Speak the response
     setDialogPhase('speaking');
-    await speakWithTTS(reply);
+    await speakWithTTS(displayReply);
 
     if (!dialogState.active) return;
 
@@ -2581,7 +2596,22 @@ function getDialogSystemPrompt() {
 F\u00fchre ein nat\u00fcrliches, lockeres Gespr\u00e4ch auf Spanisch \u2014 wie mit einem Freund.
 Antworte NUR auf Spanisch. Kurz und nat\u00fcrlich (1-2 S\u00e4tze).
 Stelle R\u00fcckfragen um das Gespr\u00e4ch am Laufen zu halten.
-Wenn der Nutzer Fehler macht, wiederhole die korrekte Form beil\u00e4ufig in deiner Antwort.
+
+WICHTIG \u2014 Fehlerkorrektur-Ablauf:
+Wenn der Nutzer einen Grammatik- oder Vokabelfehler macht:
+1. Beginne deine Antwort mit [KORREKTUR]
+2. Sage zuerst den korrekten Satz/Ausdruck vor, z.B. "Se dice: ..."
+3. Bitte den Nutzer es zu wiederholen, z.B. "Repite: ..." oder "Int\u00e9ntalo otra vez: ..."
+4. Antworte sonst NICHTS weiter \u2014 warte auf die Wiederholung.
+
+Wenn die vorherige Nachricht eine Korrektur war (begann mit [KORREKTUR]) und der Nutzer es jetzt korrekt wiederholt hat:
+1. Beginne mit [CORRECTO]
+2. Best\u00e4tige kurz (z.B. "\u00a1Muy bien!" / "\u00a1Perfecto!") und fahre dann normal mit dem Gespr\u00e4ch fort.
+
+Wenn der Nutzer es nach der Korrektur immer noch falsch sagt:
+1. Beginne wieder mit [KORREKTUR] und wiederhole die Korrektur geduldig.
+
+Wenn KEIN Fehler vorliegt, antworte ganz normal ohne Tags.
 ${vocabStr ? 'Nutze gelegentlich diese Vokabeln: ' + vocabStr + '.' : ''}${topicStr}
 Passe dich dem Level ${state.level} an. Sei warm und ermutigend.`;
 }
