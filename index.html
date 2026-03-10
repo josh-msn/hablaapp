@@ -611,21 +611,6 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
 }
 .back-btn:hover { text-decoration: underline; }
 
-/* ── Level Up Modal ── */
-.levelup-modal {
-  text-align: center;
-}
-.levelup-modal .new-level {
-  font-size: 48px;
-  color: var(--accent);
-  font-family: 'Fraunces', serif;
-  font-weight: 700;
-  margin: 16px 0;
-}
-.levelup-modal p { color: var(--text-dim); margin-bottom: 20px; }
-.levelup-actions { display: flex; gap: 12px; }
-.levelup-actions .btn { flex: 1; }
-
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1158,18 +1143,6 @@ vivir,leben,Vivo en Hamburgo."></textarea>
   </div>
 </div>
 
-<!-- Level Up Modal -->
-<div class="modal-overlay" id="levelup-modal">
-  <div class="modal levelup-modal">
-    <h3>&#x1f389; Gl&uuml;ckwunsch!</h3>
-    <p>Du hast dich verbessert! Bereit f&uuml;r das n&auml;chste Level?</p>
-    <div class="new-level" id="new-level-text">A2</div>
-    <div class="levelup-actions">
-      <button class="btn btn-outline" onclick="hideModal('levelup-modal')">Noch nicht</button>
-      <button class="btn" onclick="confirmLevelUp()">Aufsteigen!</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // ── State ──
@@ -1408,27 +1381,6 @@ function removeCustomTopic(topic) {
 function setVocabLimit(val) {
   state.vocabLimit = parseInt(val);
   save('vocab_limit', state.vocabLimit);
-}
-
-function checkLevelUp() {
-  if (state.stats.consecutiveHigh >= 10) {
-    const idx = LEVELS.indexOf(state.level);
-    if (idx < LEVELS.length - 1) {
-      const next = LEVELS[idx + 1];
-      document.getElementById('new-level-text').textContent = next;
-      showModal('levelup-modal');
-    }
-  }
-}
-
-function confirmLevelUp() {
-  const idx = LEVELS.indexOf(state.level);
-  if (idx < LEVELS.length - 1) {
-    setLevel(LEVELS[idx + 1]);
-    state.stats.consecutiveHigh = 0;
-    save('stats', state.stats);
-  }
-  hideModal('levelup-modal');
 }
 
 // ── Tips ──
@@ -1826,15 +1778,8 @@ Antworte NUR mit einer Zahl von 0 bis 10.` },
         session.score = score;
         save('history', state.history);
       }
-      // Track consecutive high scores
-      if (score > 7) {
-        state.stats.consecutiveHigh++;
-      } else {
-        state.stats.consecutiveHigh = 0;
-      }
       state.stats.sessions++;
       save('stats', state.stats);
-      checkLevelUp();
     }
   } catch (e) {
     // Silently fail
