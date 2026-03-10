@@ -674,6 +674,215 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
   opacity: 0.6;
 }
 .topic-chip .chip-remove:hover { opacity: 1; }
+
+/* ── Dialog Mode (Sprech-Modus) ── */
+.dialog-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, #1a1916 0%, #0e0d0b 70%);
+  z-index: 200;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 24px 48px;
+}
+.dialog-overlay.active { display: flex; }
+
+.dialog-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dialog-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 20px;
+  color: var(--accent);
+}
+.dialog-timer {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.dialog-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.dialog-status {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  color: var(--text-dim);
+  text-align: center;
+  min-height: 20px;
+}
+
+.dialog-transcript {
+  font-family: 'DM Mono', monospace;
+  font-size: 15px;
+  color: var(--text);
+  text-align: center;
+  width: 100%;
+  min-height: 44px;
+  line-height: 1.6;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.dialog-transcript .dialog-user-text {
+  color: var(--accent);
+  font-style: italic;
+}
+.dialog-transcript .dialog-ai-text {
+  color: var(--text);
+}
+
+/* Orb visualizer */
+.dialog-orb {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dialog-orb:active { transform: scale(0.96); }
+
+.dialog-orb-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(58,54,50,0.6) 0%, transparent 70%);
+  transition: all 0.4s;
+}
+.dialog-orb.listening .dialog-orb-glow {
+  background: radial-gradient(circle, rgba(224,92,92,0.25) 0%, transparent 70%);
+  animation: orb-breathe 1.2s ease-in-out infinite;
+}
+.dialog-orb.thinking .dialog-orb-glow {
+  background: radial-gradient(circle, rgba(154,149,144,0.2) 0%, transparent 70%);
+  animation: orb-spin-glow 2s linear infinite;
+}
+.dialog-orb.speaking .dialog-orb-glow {
+  background: radial-gradient(circle, rgba(212,168,83,0.3) 0%, transparent 70%);
+  animation: orb-breathe 0.8s ease-in-out infinite;
+}
+
+.dialog-orb-inner {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid #3a3632;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  transition: border-color 0.3s, background 0.3s;
+}
+.dialog-orb.listening .dialog-orb-inner {
+  border-color: var(--red);
+}
+.dialog-orb.thinking .dialog-orb-inner {
+  border-color: var(--text-dim);
+}
+.dialog-orb.speaking .dialog-orb-inner {
+  border-color: var(--accent);
+  background: rgba(212,168,83,0.08);
+}
+
+.dialog-orb-icon {
+  font-size: 36px;
+  transition: transform 0.2s;
+}
+
+/* Volume bars */
+.dialog-vol-bars {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  height: 32px;
+  margin-top: 8px;
+}
+.dialog-vol-bar {
+  width: 4px;
+  height: 6px;
+  background: var(--text-dim);
+  border-radius: 2px;
+  transition: height 0.08s, background 0.3s;
+}
+.dialog-orb.listening ~ .dialog-vol-bars .dialog-vol-bar {
+  background: var(--red);
+}
+.dialog-orb.speaking ~ .dialog-vol-bars .dialog-vol-bar {
+  background: var(--accent);
+}
+
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.12); opacity: 1; }
+}
+@keyframes orb-spin-glow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Bottom controls */
+.dialog-bottom {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.dialog-end-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s;
+}
+.dialog-end-btn:active { transform: scale(0.92); }
+.dialog-end-btn:hover { background: #c04a4a; }
+
+.dialog-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 12px;
+}
+
+.dialog-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -719,6 +928,7 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
       <div class="chat-input-bar">
         <input type="text" class="chat-input" id="chat-input" placeholder="Escribe en espa&ntilde;ol..." onkeydown="if(event.key==='Enter')sendMessage()">
         <button class="mic-btn" id="mic-btn" onclick="toggleRecording()" title="Mikrofon">&#x1f3a4;</button>
+        <button class="dialog-btn" onclick="enterDialogMode()" title="Dialog-Modus">&#x1f5e3;</button>
         <button class="send-btn" onclick="sendMessage()" title="Senden">&#x27A4;</button>
       </div>
     </div>
@@ -904,6 +1114,39 @@ vivir,leben,Vivo en Hamburgo."></textarea>
       <button class="btn btn-outline" style="flex:1" onclick="hideModal('change-key-modal')">Abbrechen</button>
       <button class="btn" style="flex:1" onclick="changeApiKey()">Speichern</button>
     </div>
+  </div>
+</div>
+
+<!-- Dialog Mode Overlay (Sprech-Modus) -->
+<div class="dialog-overlay" id="dialog-overlay">
+  <div class="dialog-top">
+    <div class="dialog-title">Gespr&auml;ch</div>
+    <div class="dialog-timer" id="dialog-timer">00:00</div>
+  </div>
+  <div class="dialog-center">
+    <div class="dialog-status" id="dialog-status">Starte...</div>
+    <div class="dialog-transcript" id="dialog-transcript"></div>
+    <div class="dialog-orb" id="dialog-orb" onclick="dialogOrbTap()">
+      <div class="dialog-orb-glow"></div>
+      <div class="dialog-orb-inner">
+        <span class="dialog-orb-icon" id="dialog-orb-icon">&#x1f3a4;</span>
+      </div>
+    </div>
+    <div class="dialog-vol-bars" id="dialog-vol-bars">
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+      <div class="dialog-vol-bar"></div>
+    </div>
+    <div class="dialog-hint" id="dialog-hint">Sprich einfach los &mdash; Stille wird erkannt</div>
+  </div>
+  <div class="dialog-bottom">
+    <button class="dialog-end-btn" onclick="exitDialogMode()" title="Gespr&auml;ch beenden">&#x1F4F1;</button>
   </div>
 </div>
 
@@ -1937,6 +2180,413 @@ function clearAllData() {
   localStorage.removeItem('habla_vocab_limit');
   localStorage.removeItem('habla_vocab_seen');
   location.reload();
+}
+
+// ── Sprech-Modus (Dialog Mode) ──
+let dialogState = {
+  active: false,
+  phase: 'idle', // idle, listening, thinking, speaking
+  mediaRecorder: null,
+  audioChunks: [],
+  currentAudio: null,
+  stream: null,
+  audioContext: null,
+  analyser: null,
+  silenceTimer: null,
+  volAnimFrame: null,
+  timerInterval: null,
+  timerSeconds: 0,
+  hadSpeech: false,       // true once user actually spoke (volume above threshold)
+};
+
+const SILENCE_THRESHOLD = 0.015;  // volume below this = silence
+const SILENCE_DURATION = 1800;    // ms of silence before auto-stop
+const SPEECH_MIN_MS = 600;        // minimum recording time before silence detection kicks in
+
+function enterDialogMode() {
+  dialogState.active = true;
+  dialogState.timerSeconds = 0;
+  document.getElementById('dialog-overlay').classList.add('active');
+  document.getElementById('dialog-transcript').innerHTML = '';
+  updateDialogTimer();
+  dialogState.timerInterval = setInterval(() => {
+    dialogState.timerSeconds++;
+    updateDialogTimer();
+  }, 1000);
+  // Auto-start listening
+  startDialogRecording();
+}
+
+function exitDialogMode() {
+  dialogState.active = false;
+  document.getElementById('dialog-overlay').classList.remove('active');
+  // Stop everything
+  stopSilenceDetection();
+  if (dialogState.phase === 'listening') stopDialogRecording(true);
+  if (dialogState.currentAudio) {
+    dialogState.currentAudio.pause();
+    dialogState.currentAudio = null;
+  }
+  if (dialogState.stream) {
+    dialogState.stream.getTracks().forEach(t => t.stop());
+    dialogState.stream = null;
+  }
+  if (dialogState.audioContext) {
+    dialogState.audioContext.close().catch(() => {});
+    dialogState.audioContext = null;
+  }
+  clearInterval(dialogState.timerInterval);
+  cancelAnimationFrame(dialogState.volAnimFrame);
+  setDialogPhase('idle');
+}
+
+function updateDialogTimer() {
+  const m = Math.floor(dialogState.timerSeconds / 60).toString().padStart(2, '0');
+  const s = (dialogState.timerSeconds % 60).toString().padStart(2, '0');
+  document.getElementById('dialog-timer').textContent = m + ':' + s;
+}
+
+function setDialogPhase(phase) {
+  dialogState.phase = phase;
+  const orb = document.getElementById('dialog-orb');
+  const icon = document.getElementById('dialog-orb-icon');
+  const status = document.getElementById('dialog-status');
+
+  orb.classList.remove('listening', 'thinking', 'speaking');
+  if (phase !== 'idle') orb.classList.add(phase);
+
+  switch (phase) {
+    case 'idle':
+      icon.innerHTML = '&#x1f3a4;';
+      status.textContent = 'Tippe zum Starten';
+      resetVolBars();
+      break;
+    case 'listening':
+      icon.innerHTML = '&#x1f3a4;';
+      status.textContent = 'Ich h\u00f6re zu...';
+      break;
+    case 'thinking':
+      icon.innerHTML = '&#x1f4ad;';
+      status.textContent = 'Denke nach...';
+      resetVolBars();
+      break;
+    case 'speaking':
+      icon.innerHTML = '&#x1f50a;';
+      status.textContent = '';
+      break;
+  }
+}
+
+function dialogOrbTap() {
+  if (dialogState.phase === 'idle') {
+    startDialogRecording();
+  } else if (dialogState.phase === 'listening') {
+    // Manual stop
+    stopDialogRecording();
+  } else if (dialogState.phase === 'speaking') {
+    // Skip TTS, start recording
+    if (dialogState.currentAudio) {
+      dialogState.currentAudio.pause();
+      dialogState.currentAudio = null;
+    }
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    startDialogRecording();
+  }
+}
+
+// ── Recording with silence detection ──
+async function startDialogRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    dialogState.stream = stream;
+    dialogState.audioChunks = [];
+    dialogState.hadSpeech = false;
+
+    // Setup audio analysis for silence detection + volume bars
+    dialogState.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = dialogState.audioContext.createMediaStreamSource(stream);
+    dialogState.analyser = dialogState.audioContext.createAnalyser();
+    dialogState.analyser.fftSize = 512;
+    source.connect(dialogState.analyser);
+
+    dialogState.mediaRecorder = new MediaRecorder(stream, { mimeType: getMimeType() });
+    dialogState.mediaRecorder.ondataavailable = e => {
+      if (e.data.size > 0) dialogState.audioChunks.push(e.data);
+    };
+    dialogState.mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      dialogState.stream = null;
+      stopSilenceDetection();
+      if (dialogState.audioContext) {
+        dialogState.audioContext.close().catch(() => {});
+        dialogState.audioContext = null;
+      }
+      processDialogAudio();
+    };
+    dialogState.mediaRecorder.start();
+    setDialogPhase('listening');
+
+    // Start silence detection + volume visualization
+    const recordStart = Date.now();
+    startSilenceDetection(recordStart);
+    startVolVisualization();
+
+  } catch (e) {
+    document.getElementById('dialog-status').textContent = 'Mikrofon-Zugriff fehlgeschlagen';
+    setDialogPhase('idle');
+  }
+}
+
+function stopDialogRecording(skipProcess) {
+  stopSilenceDetection();
+  cancelAnimationFrame(dialogState.volAnimFrame);
+  if (dialogState.mediaRecorder && dialogState.mediaRecorder.state !== 'inactive') {
+    if (skipProcess) {
+      dialogState.mediaRecorder.onstop = () => {
+        if (dialogState.stream) {
+          dialogState.stream.getTracks().forEach(t => t.stop());
+          dialogState.stream = null;
+        }
+      };
+    }
+    dialogState.mediaRecorder.stop();
+  }
+}
+
+function getVolume() {
+  if (!dialogState.analyser) return 0;
+  const data = new Uint8Array(dialogState.analyser.frequencyBinCount);
+  dialogState.analyser.getByteTimeDomainData(data);
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) {
+    const v = (data[i] - 128) / 128;
+    sum += v * v;
+  }
+  return Math.sqrt(sum / data.length);
+}
+
+function startSilenceDetection(recordStart) {
+  let silenceSince = null;
+
+  function check() {
+    if (!dialogState.active || dialogState.phase !== 'listening') return;
+    const vol = getVolume();
+    const elapsed = Date.now() - recordStart;
+
+    // Track if user has spoken at all
+    if (vol > SILENCE_THRESHOLD * 2) dialogState.hadSpeech = true;
+
+    // Only detect silence after min recording time and after user actually spoke
+    if (elapsed > SPEECH_MIN_MS && dialogState.hadSpeech) {
+      if (vol < SILENCE_THRESHOLD) {
+        if (!silenceSince) silenceSince = Date.now();
+        else if (Date.now() - silenceSince > SILENCE_DURATION) {
+          // Silence detected — stop recording
+          stopDialogRecording();
+          return;
+        }
+      } else {
+        silenceSince = null;
+      }
+    }
+    dialogState.silenceTimer = setTimeout(check, 100);
+  }
+  check();
+}
+
+function stopSilenceDetection() {
+  clearTimeout(dialogState.silenceTimer);
+}
+
+// ── Volume bar visualization ──
+function startVolVisualization() {
+  const bars = document.querySelectorAll('#dialog-vol-bars .dialog-vol-bar');
+  function draw() {
+    if (!dialogState.active || (dialogState.phase !== 'listening' && dialogState.phase !== 'speaking')) {
+      resetVolBars();
+      return;
+    }
+    const vol = (dialogState.phase === 'listening') ? getVolume() : 0;
+    const barCount = bars.length;
+    for (let i = 0; i < barCount; i++) {
+      // Create a wave-like pattern
+      const center = (barCount - 1) / 2;
+      const dist = Math.abs(i - center) / center;
+      const h = Math.max(4, Math.min(28, vol * (1 - dist * 0.5) * 250 + Math.random() * 4));
+      bars[i].style.height = h + 'px';
+    }
+    dialogState.volAnimFrame = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+function resetVolBars() {
+  const bars = document.querySelectorAll('#dialog-vol-bars .dialog-vol-bar');
+  bars.forEach(b => b.style.height = '6px');
+}
+
+// ── Process audio and conversation loop ──
+async function processDialogAudio() {
+  if (!dialogState.active) return;
+  setDialogPhase('thinking');
+
+  const mimeType = dialogState.mediaRecorder.mimeType || 'audio/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+  const blob = new Blob(dialogState.audioChunks, { type: mimeType });
+
+  try {
+    // 1. Transcribe with Whisper
+    const formData = new FormData();
+    formData.append('file', blob, 'audio.' + ext);
+    formData.append('model', 'whisper-1');
+    formData.append('language', 'es');
+    formData.append('response_format', 'verbose_json');
+
+    const whisperRes = await fetch(API_BASE + '/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + state.apiKey },
+      body: formData,
+    });
+    if (!whisperRes.ok) {
+      const err = await whisperRes.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Whisper Fehler');
+    }
+    const whisperData = await whisperRes.json();
+    const transcript = whisperData.text;
+    if (!transcript || !transcript.trim()) {
+      document.getElementById('dialog-status').textContent = 'Nichts erkannt';
+      // Try again after short pause
+      if (dialogState.active) setTimeout(() => { if (dialogState.active) startDialogRecording(); }, 800);
+      return;
+    }
+
+    // Show what user said
+    document.getElementById('dialog-transcript').innerHTML =
+      '<span class="dialog-user-text">\u201e' + esc(transcript) + '\u201c</span>';
+
+    // Save to chat
+    addChatBubble('user', transcript);
+    state.currentChat.push({ role: 'user', content: transcript });
+
+    // 2. Get AI response
+    const messages = [
+      { role: 'system', content: getDialogSystemPrompt() },
+      ...state.currentChat.slice(-20)
+    ];
+    const chatRes = await fetch(API_BASE + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey,
+      },
+      body: JSON.stringify({ model: 'gpt-4o', messages, max_tokens: 300 }),
+    });
+    if (!chatRes.ok) {
+      const err = await chatRes.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Chat Fehler');
+    }
+    const chatData = await chatRes.json();
+    const reply = chatData.choices[0].message.content;
+
+    // Save to chat
+    addChatBubble('assistant', reply);
+    state.currentChat.push({ role: 'assistant', content: reply });
+    saveCurrentSession();
+
+    // Show AI reply
+    document.getElementById('dialog-transcript').innerHTML =
+      '<span class="dialog-ai-text">' + esc(reply) + '</span>';
+
+    if (!dialogState.active) return;
+
+    // 3. Speak the response
+    setDialogPhase('speaking');
+    await speakWithTTS(reply);
+
+    if (!dialogState.active) return;
+
+    // 4. Auto-listen again — seamless loop
+    startDialogRecording();
+
+  } catch (e) {
+    document.getElementById('dialog-transcript').innerHTML =
+      '<span style="color:var(--red);">Fehler: ' + esc(e.message) + '</span>';
+    setDialogPhase('idle');
+    addChatBubble('system', 'Sprech-Modus Fehler: ' + e.message);
+  }
+}
+
+function getDialogSystemPrompt() {
+  const vocabs = selectVocabsForChat();
+  const vocabStr = vocabs.map(v => `${v.es} = ${v.de}`).join(', ');
+  const topicStr = state.topics.length > 0
+    ? `\nBevorzugte Gespr\u00e4chsthemen: ${state.topics.join(', ')}.`
+    : '';
+
+  return `Du bist eine freundliche Person, mit der man Spanisch \u00fcbt (Niveau: ${state.level}).
+F\u00fchre ein nat\u00fcrliches, lockeres Gespr\u00e4ch auf Spanisch \u2014 wie mit einem Freund.
+Antworte NUR auf Spanisch. Kurz und nat\u00fcrlich (1-2 S\u00e4tze).
+Stelle R\u00fcckfragen um das Gespr\u00e4ch am Laufen zu halten.
+Wenn der Nutzer Fehler macht, wiederhole die korrekte Form beil\u00e4ufig in deiner Antwort.
+${vocabStr ? 'Nutze gelegentlich diese Vokabeln: ' + vocabStr + '.' : ''}${topicStr}
+Passe dich dem Level ${state.level} an. Sei warm und ermutigend.`;
+}
+
+// ── TTS ──
+async function speakWithTTS(text) {
+  try {
+    const res = await fetch(API_BASE + '/audio/speech', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + state.apiKey,
+      },
+      body: JSON.stringify({
+        model: 'tts-1',
+        input: text,
+        voice: 'nova',
+        response_format: 'mp3',
+      }),
+    });
+    if (!res.ok) {
+      return speakWithBrowserTTS(text);
+    }
+    const audioBlob = await res.blob();
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
+    dialogState.currentAudio = audio;
+
+    return new Promise((resolve) => {
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        dialogState.currentAudio = null;
+        resolve();
+      };
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        dialogState.currentAudio = null;
+        resolve();
+      };
+      audio.play().catch(() => {
+        dialogState.currentAudio = null;
+        speakWithBrowserTTS(text).then(resolve);
+      });
+    });
+  } catch (e) {
+    return speakWithBrowserTTS(text);
+  }
+}
+
+function speakWithBrowserTTS(text) {
+  return new Promise((resolve) => {
+    if (!window.speechSynthesis) { resolve(); return; }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.9;
+    utterance.onend = resolve;
+    utterance.onerror = resolve;
+    speechSynthesis.speak(utterance);
+  });
 }
 
 // ── New Session ──
