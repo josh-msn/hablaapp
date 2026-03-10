@@ -634,8 +634,10 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
       <div class="vocab-header">
         <h2>Vokabeln</h2>
         <div class="vocab-actions">
-          <button class="btn btn-sm btn-outline" onclick="showModal('csv-modal')">CSV Import</button>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('txt-file-input').click()">TXT Import</button>
+          <button class="btn btn-sm btn-outline" onclick="showModal('csv-modal')">CSV</button>
           <button class="btn btn-sm" onclick="showModal('add-vocab-modal')">+ Neu</button>
+          <input type="file" id="txt-file-input" accept=".txt,.csv,.tsv" style="display:none" onchange="importTxtFile(this)">
         </div>
       </div>
       <div class="vocab-list" id="vocab-list"></div>
@@ -1293,11 +1295,18 @@ Antworte NUR mit einer Zahl von 0 bis 10.` },
 }
 
 // ── Vocabulary ──
+function isDuplicate(es, de) {
+  const esN = es.toLowerCase().trim();
+  const deN = de.toLowerCase().trim();
+  return state.vocabulary.some(v => v.es.toLowerCase().trim() === esN && v.de.toLowerCase().trim() === deN);
+}
+
 function addVocab() {
   const es = document.getElementById('new-vocab-es').value.trim();
   const de = document.getElementById('new-vocab-de').value.trim();
   const ex = document.getElementById('new-vocab-ex').value.trim();
   if (!es || !de) return alert('Bitte Spanisch und Deutsch eingeben.');
+  if (isDuplicate(es, de)) return alert('Diese Vokabel existiert bereits.');
   state.vocabulary.push({ es, de, example: ex, added: new Date().toISOString() });
   save('vocabulary', state.vocabulary);
   document.getElementById('new-vocab-es').value = '';
@@ -1311,10 +1320,11 @@ function importCSV() {
   const text = document.getElementById('csv-input').value.trim();
   if (!text) return;
   const lines = text.split('\n').filter(l => l.trim());
-  let count = 0;
+  let count = 0, skipped = 0;
   lines.forEach(line => {
     const parts = line.split(',').map(p => p.trim());
     if (parts.length >= 2) {
+      if (isDuplicate(parts[0], parts[1])) { skipped++; return; }
       state.vocabulary.push({
         es: parts[0],
         de: parts[1],
@@ -1328,7 +1338,42 @@ function importCSV() {
   document.getElementById('csv-input').value = '';
   hideModal('csv-modal');
   renderVocabList();
-  addChatBubble('system', count + ' Vokabeln importiert!');
+  const msg = count + ' Vokabeln importiert!' + (skipped ? ' (' + skipped + ' Duplikate übersprungen)' : '');
+  addChatBubble('system', msg);
+}
+
+function importTxtFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split('\n').filter(l => l.trim());
+    let count = 0, skipped = 0;
+    lines.forEach(line => {
+      // Skip metadata lines like #separator, #html, etc.
+      if (line.startsWith('#')) return;
+      // Tab-separated: Deutsch\tSpanisch
+      const parts = line.split('\t').map(p => p.trim());
+      if (parts.length >= 2) {
+        const de = parts[0];
+        const es = parts[1];
+        if (isDuplicate(es, de)) { skipped++; return; }
+        state.vocabulary.push({
+          es, de, example: '',
+          added: new Date().toISOString(),
+        });
+        count++;
+      }
+    });
+    save('vocabulary', state.vocabulary);
+    renderVocabList();
+    const msg = count + ' Vokabeln importiert!' + (skipped ? ' (' + skipped + ' Duplikate übersprungen)' : '');
+    addChatBubble('system', msg);
+    showScreen('vocab');
+  };
+  reader.readAsText(file);
+  input.value = '';
 }
 
 function saveFromChat(text) {
