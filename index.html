@@ -1244,6 +1244,41 @@ const TIPS = {
 TIPS.B2 = TIPS.B1;
 TIPS.C1 = TIPS.B1;
 
+// Aussprache-Tipps — werden auf allen Levels eingemischt
+const PRONUNCIATION_TIPS = [
+  // Buchstaben, die anders klingen als im Deutschen
+  '🗣 Das "j" wird im Spanischen wie ein raues "ch" (Bach) gesprochen: jamón → "chamón", jugar → "chugar".',
+  '🗣 "G" vor e/i klingt wie das "j" (raues ch): gente → "chente", girar → "chirar". Vor a/o/u ist es wie im Deutschen: gato, gol.',
+  '🗣 "H" ist im Spanischen IMMER stumm: hablar = "ablar", hola = "ola", hotel = "otel".',
+  '🗣 "Ñ" spricht man wie "nj": España → "Espanja", niño → "ninjo", año → "anjo".',
+  '🗣 "LL" klingt wie "j" (deutsch): llamar → "jamar", calle → "kaje", lluvia → "juvia".',
+  '🗣 "V" wird im Spanischen wie "b" gesprochen: vino = "bino", vivir = "bibir". Es gibt keinen Unterschied zwischen b und v!',
+  '🗣 "Z" und "C" (vor e/i) werden in Spanien wie englisches "th" gesprochen: zapato → "thapato", cielo → "thielo". In Lateinamerika wie "s".',
+  '🗣 "RR" ist das gerollte R: perro ≠ pero! Übe das Zungenrollen: rrrr. Bei "r" am Wortanfang wird auch gerollt: rojo, ratón.',
+  '🗣 "QU" wird wie "k" gesprochen (das u ist stumm): queso = "keso", quién = "kién". Nie "kw" wie im Deutschen!',
+  '🗣 "CH" ist ein eigener Laut, wie "tsch": chocolate → "tschokolate", mucho → "mutscho".',
+
+  // Doppelbuchstaben & Besonderheiten
+  '🗣 Doppelbuchstaben: Im Spanischen kommen nur cc, ll, nn, rr doppelt vor. CC spricht man "k-th/k-s": acción → "ak-thión".',
+  '🗣 "GU" vor e/i: Das u ist stumm! guerra = "gerra", guitarra = "gitarra". Mit Trema (güe/güi) spricht man das u mit: vergüenza.',
+  '🗣 "CU" vor Vokal klingt wie "kw": cuando = "kwando", cuenta = "kwenta".',
+
+  // Betonung
+  '🗣 Betonung: Wörter auf Vokal, -n oder -s → vorletzte Silbe betont: haBLO, coMEN. Auf Konsonant → letzte Silbe: haBLAR, ciuDAD.',
+  '🗣 Akzent (´) zeigt immer die betonte Silbe: café, teléfono, médico. Ohne Akzent gelten die Standardregeln.',
+  '🗣 Fragezeichen ¿? und Ausrufezeichen ¡! stehen im Spanischen am Anfang UND Ende: ¿Cómo estás? ¡Hola!',
+
+  // Vokale
+  '🗣 Spanische Vokale sind IMMER kurz und klar: a, e, i, o, u — nie verschluckt oder genuschelt wie im Deutschen.',
+  '🗣 "E" am Wortende wird immer gesprochen: grande = "gran-de" (2 Silben), noche = "no-tsche" (2 Silben).',
+
+  // Verbindungen & Fluss
+  '🗣 Wörter verschmelzen beim Sprechen: "¿Cómo estás?" klingt wie "kómoestás". Versuche fließend zu sprechen!',
+  '🗣 "D" zwischen Vokalen wird ganz weich, fast wie englisches "th": nada → "na-tha", todo → "to-tho".',
+  '🗣 "S" ist im Spanischen immer stimmlos (scharf), nie weich wie in "Rose": casa = "kassa", rosa = "rossa".',
+  '🗣 "X" vor Konsonant = "s": explicar → "esplicar". Zwischen Vokalen = "ks": éxito → "éksito". In México = "ch": México → "Méchiko".',
+];
+
 // ── LocalStorage Helpers ──
 function load(key, fallback) {
   try { const v = localStorage.getItem('habla_' + key); return v ? JSON.parse(v) : fallback; }
@@ -1390,6 +1425,25 @@ function confirmLevelUp() {
 
 // ── Tips ──
 function showTip() {
+  // ~40% chance to show a pronunciation tip instead of a grammar/level tip
+  const showPronunciation = Math.random() < 0.4;
+
+  if (showPronunciation) {
+    const unseen = PRONUNCIATION_TIPS.filter((_, i) => !state.tipsSeen.includes('pron_' + i));
+    if (unseen.length > 0) {
+      const idx = PRONUNCIATION_TIPS.indexOf(unseen[Math.floor(Math.random() * unseen.length)]);
+      document.getElementById('tip-text').textContent = PRONUNCIATION_TIPS[idx];
+      document.getElementById('tip-banner').style.display = 'flex';
+      state.tipsSeen.push('pron_' + idx);
+      save('tips_seen', state.tipsSeen);
+      return;
+    }
+    // All pronunciation tips seen — reset them
+    state.tipsSeen = state.tipsSeen.filter(t => !t.startsWith('pron_'));
+    save('tips_seen', state.tipsSeen);
+  }
+
+  // Level-specific tip
   const levelTips = TIPS[state.level] || TIPS.A1;
   const unseen = levelTips.filter((_, i) => !state.tipsSeen.includes(state.level + '_' + i));
   if (unseen.length === 0) {
