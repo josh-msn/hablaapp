@@ -580,6 +580,34 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
   outline: none;
 }
 .csv-area:focus { border-color: var(--accent); }
+
+/* ── Topic Chips ── */
+.topic-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  border: 1px solid #3a3632;
+  background: var(--bg-input);
+  color: var(--text-dim);
+  transition: all 0.2s;
+  user-select: none;
+}
+.topic-chip.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.topic-chip .chip-remove {
+  font-size: 14px;
+  margin-left: 2px;
+  opacity: 0.6;
+}
+.topic-chip .chip-remove:hover { opacity: 1; }
 </style>
 </head>
 <body>
@@ -683,6 +711,27 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
             <option value="B1">B1</option>
             <option value="B2">B2</option>
             <option value="C1">C1</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Themen &amp; Vokabel-Auswahl</h3>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">W&auml;hle bevorzugte Themen f&uuml;r die Konversation. Pro Chat werden ~30 Vokabeln intelligent ausgew&auml;hlt.</p>
+        <div id="topics-grid" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;"></div>
+        <div class="settings-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+          <label>Eigenes Thema hinzuf&uuml;gen</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="custom-topic-input" class="input-field" placeholder="z.B. Kochen, Musik..." style="flex:1;padding:8px 12px;">
+            <button class="btn btn-sm" onclick="addCustomTopic()">+</button>
+          </div>
+        </div>
+        <div class="settings-item">
+          <label>Vokabeln pro Chat</label>
+          <select id="vocab-limit-select" onchange="setVocabLimit(this.value)">
+            <option value="20">20 (sparsam)</option>
+            <option value="30" selected>30 (empfohlen)</option>
+            <option value="50">50 (mehr Vielfalt)</option>
           </select>
         </div>
       </div>
@@ -796,6 +845,10 @@ let state = {
   history: [],
   stats: { sessions: 0, consecutiveHigh: 0 },
   tipsSeen: [],
+  topics: [],          // active topic strings
+  customTopics: [],    // user-added topics
+  vocabLimit: 30,      // how many vocabs to inject per chat
+  vocabSeen: [],       // indices of recently used vocabs (for rotation)
   currentChat: [],
   currentSessionId: null,
   recording: false,
@@ -879,6 +932,10 @@ function init() {
   state.history = load('history', []);
   state.stats = load('stats', { sessions: 0, consecutiveHigh: 0 });
   state.tipsSeen = load('tips_seen', []);
+  state.topics = load('topics', []);
+  state.customTopics = load('custom_topics', []);
+  state.vocabLimit = load('vocab_limit', 30);
+  state.vocabSeen = load('vocab_seen', []);
 
   if (state.apiKey) {
     document.getElementById('setup-screen').classList.remove('active');
@@ -887,6 +944,8 @@ function init() {
     showTip();
     loadLastSession();
     renderVocabList();
+    renderTopics();
+    document.getElementById('vocab-limit-select').value = state.vocabLimit;
   }
 }
 
@@ -922,6 +981,61 @@ function setLevel(level) {
   state.level = level;
   save('level', level);
   updateLevelBadge();
+}
+
+// ── Topics ──
+const DEFAULT_TOPICS = [
+  'Reisen', 'Essen & Trinken', 'Arbeit & Beruf', 'Familie',
+  'Einkaufen', 'Wohnen', 'Freizeit', 'Gesundheit',
+  'Wetter', 'Smalltalk', 'Kultur', 'Sport',
+];
+
+function renderTopics() {
+  const grid = document.getElementById('topics-grid');
+  const allTopics = [...DEFAULT_TOPICS, ...state.customTopics];
+  grid.innerHTML = allTopics.map(t => {
+    const active = state.topics.includes(t);
+    const isCustom = state.customTopics.includes(t);
+    return `<span class="topic-chip ${active ? 'active' : ''}" onclick="toggleTopic('${esc(t)}')">${esc(t)}${isCustom ? '<span class="chip-remove" onclick="event.stopPropagation();removeCustomTopic(\'' + esc(t) + '\')">&times;</span>' : ''}</span>`;
+  }).join('');
+}
+
+function toggleTopic(topic) {
+  const idx = state.topics.indexOf(topic);
+  if (idx >= 0) state.topics.splice(idx, 1);
+  else state.topics.push(topic);
+  save('topics', state.topics);
+  renderTopics();
+}
+
+function addCustomTopic() {
+  const input = document.getElementById('custom-topic-input');
+  const topic = input.value.trim();
+  if (!topic) return;
+  if (DEFAULT_TOPICS.includes(topic) || state.customTopics.includes(topic)) {
+    if (!state.topics.includes(topic)) toggleTopic(topic);
+    input.value = '';
+    return;
+  }
+  state.customTopics.push(topic);
+  state.topics.push(topic);
+  save('custom_topics', state.customTopics);
+  save('topics', state.topics);
+  input.value = '';
+  renderTopics();
+}
+
+function removeCustomTopic(topic) {
+  state.customTopics = state.customTopics.filter(t => t !== topic);
+  state.topics = state.topics.filter(t => t !== topic);
+  save('custom_topics', state.customTopics);
+  save('topics', state.topics);
+  renderTopics();
+}
+
+function setVocabLimit(val) {
+  state.vocabLimit = parseInt(val);
+  save('vocab_limit', state.vocabLimit);
 }
 
 function checkLevelUp() {
@@ -985,12 +1099,57 @@ function showModal(id) { document.getElementById(id).classList.add('active'); }
 function hideModal(id) { document.getElementById(id).classList.remove('active'); }
 
 // ── Chat ──
+// ── Smart Vocab Selection ──
+// Picks a subset of vocabs, prioritizing:
+// 1. Vocabs matching active topics (keyword match in es/de)
+// 2. Vocabs not recently used (rotation)
+// 3. Random fill for variety
+function selectVocabsForChat() {
+  const limit = state.vocabLimit || 30;
+  const all = state.vocabulary;
+  if (all.length <= limit) return all;
+
+  const selected = new Set();
+  const topicKeywords = state.topics.map(t => t.toLowerCase());
+
+  // Score each vocab: topic match = 3, unseen = 2, random = 1
+  const scored = all.map((v, i) => {
+    let score = 1 + Math.random(); // base random score
+    const text = (v.es + ' ' + v.de).toLowerCase();
+    // Boost if matches an active topic
+    if (topicKeywords.length > 0 && topicKeywords.some(kw => text.includes(kw))) {
+      score += 3;
+    }
+    // Boost if not recently seen
+    if (!state.vocabSeen.includes(i)) {
+      score += 2;
+    }
+    return { index: i, score, vocab: v };
+  });
+
+  // Sort by score descending, pick top N
+  scored.sort((a, b) => b.score - a.score);
+  const picks = scored.slice(0, limit);
+
+  // Track seen vocabs (keep last 2x limit for rotation window)
+  const newSeen = picks.map(p => p.index);
+  state.vocabSeen = [...state.vocabSeen, ...newSeen].slice(-(limit * 2));
+  save('vocab_seen', state.vocabSeen);
+
+  return picks.map(p => p.vocab);
+}
+
 function getSystemPrompt() {
-  const vocabStr = state.vocabulary.map(v => `${v.es} = ${v.de}`).join(', ');
+  const vocabs = selectVocabsForChat();
+  const vocabStr = vocabs.map(v => `${v.es} = ${v.de}`).join(', ');
+  const topicStr = state.topics.length > 0
+    ? `\nBevorzugte Gesprächsthemen: ${state.topics.join(', ')}.`
+    : '';
+
   return `Du bist ein geduldiger Spanischlehrer für Anfänger (Niveau: ${state.level}).
 Antworte immer auf Spanisch, aber erkläre Fehler kurz auf Deutsch.
-${vocabStr ? 'Nutze bevorzugt Vokabeln aus dieser Liste: ' + vocabStr + '.' : ''}
-Baue Konversationsthemen rund um diese Vokabeln auf.
+${vocabStr ? 'Nutze bevorzugt Vokabeln aus dieser Auswahl: ' + vocabStr + '.' : ''}
+Baue Konversationsthemen rund um diese Vokabeln auf.${topicStr}
 Gib nach jeder Nutzerantwort kurzes Aussprache-/Grammatik-Feedback.
 Passe Satzkomplexität und Tempo dem Level ${state.level} an.
 Halte deine Antworten kurz und klar (2-4 Sätze).`;
@@ -1532,6 +1691,10 @@ function clearAllData() {
   localStorage.removeItem('habla_history');
   localStorage.removeItem('habla_stats');
   localStorage.removeItem('habla_tips_seen');
+  localStorage.removeItem('habla_topics');
+  localStorage.removeItem('habla_custom_topics');
+  localStorage.removeItem('habla_vocab_limit');
+  localStorage.removeItem('habla_vocab_seen');
   location.reload();
 }
 
