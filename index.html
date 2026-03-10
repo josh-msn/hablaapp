@@ -376,6 +376,35 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
   cursor: pointer; font-size: 16px; padding: 4px 8px;
 }
 .vocab-delete:hover { color: var(--red); }
+.vocab-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  margin-top: 3px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.vocab-status.learning {
+  background: rgba(217,164,73,0.15);
+  color: var(--accent);
+}
+.vocab-status.mastered {
+  background: rgba(76,175,80,0.15);
+  color: #4caf50;
+}
+.vocab-progress-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.vocab-progress-dots .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #3a3632;
+}
+.vocab-progress-dots .dot.filled { background: var(--accent); }
+.vocab-progress-dots .dot.filled.mastered-dot { background: #4caf50; }
 .vocab-empty {
   display: flex;
   flex-direction: column;
@@ -415,6 +444,31 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
 
 /* ── Review Screen ── */
 .review-screen { padding: 0; }
+.review-filter-bar {
+  display: flex;
+  gap: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #2a2724;
+  flex-shrink: 0;
+}
+.review-filter-btn {
+  flex: 1;
+  background: none;
+  border: 1px solid #3a3632;
+  color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 8px 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.review-filter-btn:first-child { border-radius: 8px 0 0 8px; }
+.review-filter-btn:last-child { border-radius: 0 8px 8px 0; }
+.review-filter-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
 .review-card-container {
   flex: 1;
   display: flex;
@@ -444,6 +498,14 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
 .review-card .card-answer { font-size: 18px; color: var(--text); margin-top: 16px; }
 .review-card .card-example { font-size: 13px; color: var(--text-dim); margin-top: 12px; font-style: italic; }
 .review-card .card-hint { font-size: 12px; color: var(--text-dim); margin-top: 20px; }
+.review-card .card-srs-info {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #2a2724;
+  width: 100%;
+}
 .review-controls {
   display: flex;
   gap: 12px;
@@ -451,6 +513,10 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
   flex-shrink: 0;
 }
 .review-controls .btn { flex: 1; }
+.btn-correct { background: #4caf50; color: #fff; border-color: #4caf50; }
+.btn-correct:hover { background: #43a047; }
+.btn-wrong { background: var(--red); color: #fff; border-color: var(--red); }
+.btn-wrong:hover { opacity: 0.9; }
 .review-progress {
   text-align: center;
   font-size: 12px;
@@ -673,9 +739,15 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
 
     <!-- Review -->
     <div id="review-screen" class="screen review-screen">
+      <div class="review-filter-bar">
+        <button class="review-filter-btn active" data-filter="due" onclick="setReviewFilter('due')">F&auml;llig <span id="review-count-due"></span></button>
+        <button class="review-filter-btn" data-filter="all" onclick="setReviewFilter('all')">Alle</button>
+        <button class="review-filter-btn" data-filter="mastered" onclick="setReviewFilter('mastered')">Gemeistert</button>
+      </div>
       <div class="review-card-container" id="review-container"></div>
       <div class="review-controls" id="review-controls" style="display:none;">
-        <button class="btn btn-outline" onclick="reviewNext()">N&auml;chste &#x27A4;</button>
+        <button class="btn btn-wrong" onclick="reviewAnswer(false)">Falsch</button>
+        <button class="btn btn-correct" onclick="reviewAnswer(true)">Richtig</button>
       </div>
       <div class="review-progress" id="review-progress"></div>
     </div>
@@ -1553,45 +1625,118 @@ function deleteVocab(index) {
   renderVocabList();
 }
 
+function toggleMastered(index) {
+  const v = ensureSRS(state.vocabulary[index]);
+  if (v.mastered) {
+    v.mastered = false;
+    v.correctStreak = 0;
+  } else {
+    v.mastered = true;
+    v.correctStreak = 3;
+  }
+  save('vocabulary', state.vocabulary);
+  renderVocabList();
+}
+
 function renderVocabList() {
   const list = document.getElementById('vocab-list');
   if (state.vocabulary.length === 0) {
     list.innerHTML = '<div class="vocab-empty"><p>Noch keine Vokabeln.</p><p style="margin-top:8px;font-size:12px;">Importiere via CSV oder f&uuml;ge manuell hinzu.</p></div>';
     return;
   }
-  list.innerHTML = state.vocabulary.map((v, i) => `
+  const masteredCount = state.vocabulary.filter(v => ensureSRS(v).mastered).length;
+  const total = state.vocabulary.length;
+  list.innerHTML = `<div style="padding:8px 0;font-size:12px;color:var(--text-dim);">${masteredCount}/${total} gemeistert</div>` +
+  state.vocabulary.map((v, i) => {
+    ensureSRS(v);
+    const dots = [0,1,2].map(d =>
+      `<span class="dot ${d < v.correctStreak ? (v.mastered ? 'filled mastered-dot' : 'filled') : ''}"></span>`
+    ).join('');
+    const statusClass = v.mastered ? 'mastered' : 'learning';
+    const statusLabel = v.mastered ? 'Gemeistert' : `${v.correctStreak}/3`;
+    return `
     <div class="vocab-item">
-      <div>
+      <div style="flex:1;min-width:0;">
         <div class="vocab-es">${esc(v.es)}</div>
         <div class="vocab-de">${esc(v.de)}</div>
         ${v.example ? `<div class="vocab-example">${esc(v.example)}</div>` : ''}
+        <span class="vocab-status ${statusClass}" onclick="toggleMastered(${i})" title="Klicke zum Umschalten">
+          <span class="vocab-progress-dots">${dots}</span> ${statusLabel}
+        </span>
       </div>
-      <button class="vocab-delete" onclick="deleteVocab(${i})" title="Löschen">&times;</button>
+      <button class="vocab-delete" onclick="deleteVocab(${i})" title="L&ouml;schen">&times;</button>
     </div>
-  `).join('');
+  `}).join('');
 }
 
-// ── Review (Flashcards) ──
+// ── Review (Flashcards with SRS) ──
+// Each vocab gets: correctStreak (0-3), mastered (bool), lastReview (timestamp)
+// 3 correct in a row → mastered. Wrong resets streak to 0.
+// Users can toggle mastered status manually.
+
+function ensureSRS(v) {
+  if (v.correctStreak === undefined) v.correctStreak = 0;
+  if (v.mastered === undefined) v.mastered = false;
+  if (v.lastReview === undefined) v.lastReview = 0;
+  return v;
+}
+
+function getReviewVocabs(filter) {
+  return state.vocabulary
+    .map((v, i) => ({ ...ensureSRS(v), _idx: i }))
+    .filter(v => {
+      if (filter === 'mastered') return v.mastered;
+      if (filter === 'due') return !v.mastered;
+      return true; // 'all'
+    });
+}
+
+state.reviewFilter = 'due';
+
+function setReviewFilter(filter) {
+  state.reviewFilter = filter;
+  document.querySelectorAll('.review-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  startReview();
+}
+
+function updateReviewCounts() {
+  const due = state.vocabulary.filter(v => !ensureSRS(v).mastered).length;
+  const el = document.getElementById('review-count-due');
+  if (el) el.textContent = due > 0 ? `(${due})` : '';
+}
+
 function startReview() {
   const container = document.getElementById('review-container');
   const controls = document.getElementById('review-controls');
   const progress = document.getElementById('review-progress');
 
+  updateReviewCounts();
+  const vocabs = getReviewVocabs(state.reviewFilter);
+
   if (state.vocabulary.length === 0) {
-    container.innerHTML = '<div class="review-empty"><p>Keine Vokabeln zum Wiederholen.</p><p style="margin-top:8px;font-size:12px;">F&uuml;ge zuerst Vokabeln hinzu.</p></div>';
+    container.innerHTML = '<div class="review-empty"><p>Keine Vokabeln vorhanden.</p><p style="margin-top:8px;font-size:12px;">F&uuml;ge zuerst Vokabeln hinzu.</p></div>';
     controls.style.display = 'none';
     progress.textContent = '';
     return;
   }
 
+  if (vocabs.length === 0) {
+    const msg = state.reviewFilter === 'due'
+      ? '<p>Alles gemeistert!</p><p style="margin-top:8px;font-size:12px;">Wechsle zu "Alle" oder f&uuml;ge neue Vokabeln hinzu.</p>'
+      : '<p>Keine Vokabeln in dieser Kategorie.</p>';
+    container.innerHTML = '<div class="review-empty">' + msg + '</div>';
+    controls.style.display = 'none';
+    progress.textContent = '';
+    return;
+  }
+
+  // Shuffle and prioritize: least recently reviewed first, then random
+  state.reviewOrder = vocabs.sort((a, b) => a.lastReview - b.lastReview + (Math.random() - 0.5) * 1000);
   state.reviewIndex = 0;
   state.reviewRevealed = false;
-  shuffleReview();
   showReviewCard();
-}
-
-function shuffleReview() {
-  state.reviewOrder = state.vocabulary.map((_, i) => i).sort(() => Math.random() - 0.5);
 }
 
 function showReviewCard() {
@@ -1600,20 +1745,30 @@ function showReviewCard() {
   const progress = document.getElementById('review-progress');
 
   if (state.reviewIndex >= state.reviewOrder.length) {
-    container.innerHTML = '<div class="review-empty"><p>&#x1f389; Alle Karten durchgearbeitet!</p></div>';
+    container.innerHTML = '<div class="review-empty"><p>Alle Karten dieser Runde durch!</p></div>';
     controls.style.display = 'none';
     progress.textContent = '';
+    updateReviewCounts();
     return;
   }
 
-  const v = state.vocabulary[state.reviewOrder[state.reviewIndex]];
+  const v = state.reviewOrder[state.reviewIndex];
   state.reviewRevealed = false;
+
+  const streakDots = [0,1,2].map(i =>
+    `<span class="dot ${i < v.correctStreak ? (v.mastered ? 'filled mastered-dot' : 'filled') : ''}"></span>`
+  ).join('');
+
   container.innerHTML = `
     <div class="review-card" onclick="revealCard()">
       <div class="card-word">${esc(v.es)}</div>
       <div class="card-answer" id="card-answer" style="display:none;">${esc(v.de)}</div>
       ${v.example ? `<div class="card-example" id="card-example" style="display:none;">${esc(v.example)}</div>` : ''}
       <div class="card-hint" id="card-hint">Tippe zum Aufdecken</div>
+      <div class="card-srs-info" id="card-srs-info" style="display:none;">
+        <span class="vocab-progress-dots">${streakDots}</span>
+        ${v.mastered ? ' Gemeistert' : ` ${v.correctStreak}/3 richtig`}
+      </div>
     </div>
   `;
   controls.style.display = 'flex';
@@ -1626,9 +1781,34 @@ function revealCard() {
   const ans = document.getElementById('card-answer');
   const ex = document.getElementById('card-example');
   const hint = document.getElementById('card-hint');
+  const srs = document.getElementById('card-srs-info');
   if (ans) ans.style.display = 'block';
   if (ex) ex.style.display = 'block';
   if (hint) hint.style.display = 'none';
+  if (srs) srs.style.display = 'block';
+}
+
+function reviewAnswer(correct) {
+  if (!state.reviewRevealed) {
+    revealCard();
+    return;
+  }
+  const item = state.reviewOrder[state.reviewIndex];
+  const vocab = state.vocabulary[item._idx];
+  ensureSRS(vocab);
+
+  if (correct) {
+    vocab.correctStreak = Math.min((vocab.correctStreak || 0) + 1, 3);
+    if (vocab.correctStreak >= 3) vocab.mastered = true;
+  } else {
+    vocab.correctStreak = 0;
+    vocab.mastered = false;
+  }
+  vocab.lastReview = Date.now();
+  save('vocabulary', state.vocabulary);
+
+  state.reviewIndex++;
+  showReviewCard();
 }
 
 function reviewNext() {
