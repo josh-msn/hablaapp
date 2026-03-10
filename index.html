@@ -809,6 +809,20 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
       </div>
 
       <div class="settings-section">
+        <h3>Backup &amp; Wiederherstellung</h3>
+        <p style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">&Uuml;berlebt Cache-L&ouml;schen. JSON-Datei kann auf andere Ger&auml;te &uuml;bertragen werden.</p>
+        <div class="settings-item">
+          <label>Daten exportieren</label>
+          <button class="btn btn-sm" onclick="exportData()">&#x1F4BE; Speichern</button>
+        </div>
+        <div class="settings-item">
+          <label>Daten importieren</label>
+          <button class="btn btn-sm" onclick="document.getElementById('import-file').click()">&#x1F4C2; Laden</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+        </div>
+      </div>
+
+      <div class="settings-section">
         <h3>Daten</h3>
         <div class="settings-item">
           <label>Chat-Verlauf l&ouml;schen</label>
@@ -1861,6 +1875,53 @@ function clearHistory() {
   save('history', []);
   document.getElementById('chat-messages').innerHTML = '';
   addSystemMessage('Verlauf gelöscht. Starte eine neue Konversation.');
+}
+
+function exportData() {
+  const keys = ['apikey','level','vocabulary','history','stats','tips_seen','topics','custom_topics','vocab_limit','vocab_seen'];
+  const data = {};
+  keys.forEach(k => {
+    const v = localStorage.getItem('habla_' + k);
+    if (v !== null) data[k] = JSON.parse(v);
+  });
+  data._exported = new Date().toISOString();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'habla-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  addSystemMessage('Backup gespeichert.');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      const keys = ['apikey','level','vocabulary','history','stats','tips_seen','topics','custom_topics','vocab_limit','vocab_seen'];
+      let count = 0;
+      keys.forEach(k => {
+        if (k in data) {
+          localStorage.setItem('habla_' + k, JSON.stringify(data[k]));
+          count++;
+        }
+      });
+      if (count === 0) {
+        alert('Keine gültigen Habla-Daten in der Datei gefunden.');
+        return;
+      }
+      alert('Daten importiert (' + count + ' Einträge). App wird neu geladen.');
+      location.reload();
+    } catch (err) {
+      alert('Fehler beim Importieren: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
 }
 
 function clearAllData() {
